@@ -4,9 +4,8 @@ from abc import ABC, abstractmethod
 class AbstractMirrorModule(ABC):
 
     @abstractmethod
-    def __init__(self, mirror_messaging_thread):
+    def __init__(self):
         super().__init__()
-        self.mirror_messaging_thread = mirror_messaging_thread
 
     @abstractmethod
     def mirror_started(self):

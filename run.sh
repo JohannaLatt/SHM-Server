@@ -1,5 +1,7 @@
 #!/bin/sh
 
-export FLASK_APP=Server/__init__.py
 pip install --upgrade -e .
+
+cd Server
+export FLASK_APP=__init__.py
 flask run

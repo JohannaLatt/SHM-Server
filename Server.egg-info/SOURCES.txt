@@ -4,4 +4,5 @@ Server.egg-info/dependency_links.txt
 Server.egg-info/requires.txt
 Server.egg-info/top_level.txt
 server/__init__.py
-server/views.py
+server/messaging.py
+server/modules.py

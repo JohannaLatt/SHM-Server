@@ -1,10 +1,10 @@
-import AbstractMirrorModule
+from Server.modules.abstract_mirror_module import AbstractMirrorModule
 
 
 class WelcomeModule(AbstractMirrorModule):
 
-    def __init__(self, mirror_messaging_thread):
-        super().__init__(self, mirror_messaging_thread)
+    def __init__(self):
+        super().__init__()
 
     def saySomething(self, string):
         print(string)
@@ -12,7 +12,7 @@ class WelcomeModule(AbstractMirrorModule):
     def mirror_started(self):
         super().mirror_started()
         welcome_msg = {'type': 'text', 'location': 'center', 'text': 'Welcome!', 'duration': 5}
-        self.mirror_messaging_thread.send(welcome_msg)
+        print("YES")
         pass
 
     def mirror_tracking_started(self):

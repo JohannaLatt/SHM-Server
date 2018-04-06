@@ -1,13 +1,14 @@
 from flask import Flask
 import _thread
-from . import messaging as Messaging
-from . import modules as Modules
+from Server import messaging as Messaging
+from Server import module_manager as ModuleManager
 
 PORT = 5001
 
 app = Flask(__name__)
 
-Modules.initiate_modules()
-_thread.start_new_thread(Messaging.initiate_messaging, ())
+ModuleManager.initiate_modules()
+Messaging.initiate_messaging()
+_thread.start_new_thread(Messaging.start_consuming, ())
 
 app.run(host='0.0.0.0', port=PORT, debug=False)
