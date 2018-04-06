@@ -9,17 +9,17 @@ class AbstractMirrorModule(ABC):
         self.mirror_messaging_thread = mirror_messaging_thread
 
     @abstractmethod
-    def mirror_started():
+    def mirror_started(self):
         pass
 
     @abstractmethod
-    def mirror_tracking_started():
+    def mirror_tracking_started(self):
         pass
 
     @abstractmethod
-    def mirror_tracking_data(data):
+    def mirror_tracking_data(self, data):
         pass
 
     @abstractmethod
-    def mirror_tracking_lost():
+    def mirror_tracking_lost(self):
         pass

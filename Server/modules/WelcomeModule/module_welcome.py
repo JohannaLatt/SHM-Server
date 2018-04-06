@@ -6,6 +6,9 @@ class WelcomeModule(AbstractMirrorModule):
     def __init__(self, mirror_messaging_thread):
         super().__init__(self, mirror_messaging_thread)
 
+    def saySomething(self, string):
+        print(string)
+
     def mirror_started(self):
         super().mirror_started()
         welcome_msg = {'type': 'text', 'location': 'center', 'text': 'Welcome!', 'duration': 5}
