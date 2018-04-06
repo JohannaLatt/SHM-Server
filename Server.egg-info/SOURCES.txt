@@ -5,4 +5,4 @@ Server.egg-info/requires.txt
 Server.egg-info/top_level.txt
 server/__init__.py
 server/messaging.py
-server/modules.py
+server/module_manager.py
