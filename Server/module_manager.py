@@ -5,7 +5,7 @@ import importlib
 modules = []
 
 
-def initiate_modules():
+def initiate_modules(Messaging):
     Config = configparser.ConfigParser()
     Config.read('./config/mirror_config.ini')
     module_config_names = Config.get('General', 'module_names').split(',')
@@ -18,5 +18,5 @@ def initiate_modules():
         module = importlib.import_module('.modules.' + module_path, package='Server')
         class_ = getattr(module, module_class)
         print(class_)
-        instance = class_()
+        instance = class_(Messaging)
         modules.append(instance)

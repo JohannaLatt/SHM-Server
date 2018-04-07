@@ -3,8 +3,8 @@ from Server.modules.abstract_mirror_module import AbstractMirrorModule
 
 class WelcomeModule(AbstractMirrorModule):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, Messaging):
+        super().__init__(Messaging)
 
     def saySomething(self, string):
         print(string)
@@ -13,6 +13,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().mirror_started()
         welcome_msg = {'type': 'text', 'location': 'center', 'text': 'Welcome!', 'duration': 5}
         print("YES")
+        self.Messaging.send_message('TEXT', 'This is a test message!')
         pass
 
     def mirror_tracking_started(self):
@@ -21,7 +22,7 @@ class WelcomeModule(AbstractMirrorModule):
         pass
 
     def mirror_tracking_data(self, data):
-        super().mirror_tracking_data()
+        super().mirror_tracking_data(data)
         # do nothing with that
         pass
 
