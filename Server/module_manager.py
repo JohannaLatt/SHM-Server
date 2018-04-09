@@ -13,10 +13,10 @@ def initiate_modules(Messaging):
     for module_config_name in module_config_names:
         module_path = Config.get(module_config_name, 'path_name')
         module_class = Config.get(module_config_name, 'class_name')
-        print("Initiating %r at %r\n" % (module_class, module_path))
+        # print("Initiating %r at %r\n" % (module_class, module_path))
 
         module = importlib.import_module('.modules.' + module_path, package='Server')
         class_ = getattr(module, module_class)
-        print(class_)
+        # print(class_)
         instance = class_(Messaging)
         modules.append(instance)

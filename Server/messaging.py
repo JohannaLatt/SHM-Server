@@ -2,6 +2,7 @@ import pika
 from Server.utils.enums import MSG_FROM_MIRROR_KEYS
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
 from Server import module_manager as ModuleManager
+import configparser
 
 
 # Callback for consuming incoming messages
@@ -20,7 +21,11 @@ def consume_mirror_message(ch, method, properties, body):
 
 def init():
     # Create a local messaging connection
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    Config = configparser.ConfigParser()
+    Config.read('./config/mirror_config.ini')
+    print(Config.options('General'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=Config.get('General', 'messaging_ip')))
+
     global __channel
     __channel = connection.channel()
 
@@ -55,10 +60,17 @@ def initiate_messaging_to_mirror():
     __channel.exchange_declare(exchange='to-mirror', exchange_type='direct')
 
 
-def send_message(key, body):
-    __channel.basic_publish(exchange='to-mirror',
-                    routing_key=key,
-                    body=body)
-
 def start_consuming():
     __channel.start_consuming()
+
+
+def send_message(key, body):
+    if __channel is None:
+        init()
+
+    if key not in MSG_TO_MIRROR_KEYS.__members__:
+        print("[error] %r is not a valid message key to send to the mirror" % key)
+    else:
+        __channel.basic_publish(exchange='to-mirror',
+                        routing_key=key,
+                        body=body)

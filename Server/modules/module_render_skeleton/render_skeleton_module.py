@@ -1,16 +1,13 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
 
 
-class WelcomeModule(AbstractMirrorModule):
+class RenderSkeletonModule(AbstractMirrorModule):
 
     def __init__(self, Messaging):
         super().__init__(Messaging)
 
     def mirror_started(self):
-        super().mirror_started()
-        # welcome_msg = {'type': 'text', 'location': 'center', 'text': 'Welcome!', 'duration': 5}
-        print("YES")
-        self.Messaging.send_message('TEXT', 'This is a test message!')
+        # do nothing with that
         pass
 
     def mirror_tracking_started(self):
