@@ -17,6 +17,8 @@ class RenderSkeletonModule(AbstractMirrorModule):
 
     def mirror_tracking_data(self, data):
         super().mirror_tracking_data(data)
+
+        print('[info] Received tracking data %r' % data)
         # do nothing with that
         pass
 

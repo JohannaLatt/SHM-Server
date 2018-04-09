@@ -7,7 +7,7 @@ import configparser
 
 # Callback for consuming incoming messages
 def consume_mirror_message(ch, method, properties, body):
-    print(" [x] %r:%r" % (method.routing_key, body))
+    # print(" [info] %r:%r" % (method.routing_key, body))
     # Call module callbacks depending on incoming message
     if method.routing_key == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
         for module in ModuleManager.modules:
