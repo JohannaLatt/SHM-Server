@@ -12,11 +12,17 @@ def consume_mirror_message(ch, method, properties, body):
     if method.routing_key == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
         for module in ModuleManager.modules:
             module.mirror_started()
+    elif method.routing_key == MSG_FROM_MIRROR_KEYS.MIRROR_TRACKING_STARTED.name:
+        for module in ModuleManager.modules:
+            module.mirror_tracking_started()
     elif method.routing_key == MSG_FROM_MIRROR_KEYS.MIRROR_TRACKING_DATA.name:
         for module in ModuleManager.modules:
             module.mirror_tracking_data(body)
+    elif method.routing_key == MSG_FROM_MIRROR_KEYS.MIRROR_TRACKING_LOST.name:
+        for module in ModuleManager.modules:
+            module.mirror_tracking_lost()
     else:
-        print('else')
+        print('Received unknown key {}'.format(method.routing_key))
 
 
 def init():

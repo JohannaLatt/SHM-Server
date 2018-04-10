@@ -11,8 +11,8 @@ def initiate_modules(Messaging):
     module_config_names = Config.get('General', 'module_names').split(',')
     print("Module config names: %r" % module_config_names)
     for module_config_name in module_config_names:
-        module_path = Config.get(module_config_name, 'path_name')
-        module_class = Config.get(module_config_name, 'class_name')
+        module_path = Config.get(module_config_name.strip(), 'path_name').strip()
+        module_class = Config.get(module_config_name.strip(), 'class_name').strip()
         # print("Initiating %r at %r\n" % (module_class, module_path))
 
         module = importlib.import_module('.modules.' + module_path, package='Server')

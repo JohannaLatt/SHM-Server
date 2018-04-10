@@ -10,7 +10,8 @@ class WelcomeModule(AbstractMirrorModule):
         super().mirror_started()
         # welcome_msg = {'type': 'text', 'location': 'center', 'text': 'Welcome!', 'duration': 5}
         # print("YES")
-        self.Messaging.send_message('TEXT', 'Server has receive the start-up message!')
+        self.Messaging.send_message(
+            'TEXT', 'Server has receive the start-up message!')
         pass
 
     def mirror_tracking_started(self):

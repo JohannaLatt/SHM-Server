@@ -1,4 +1,98 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
+from enum import Enum
+
+class JOINTS(Enum):
+    SPINE_BASE = 0
+    SPINE_MID = 1
+    HEAD = 3
+    SHOULDER_LEFT = 4
+    ELBOW_LEFT = 5
+    WRIST_LEFT = 6
+    HAND_LEFT = 7
+    SHOULDER_RIGHT = 8
+    ELBOW_RIGHT = 9
+    WRIST_RIGHT = 10
+    HAND_RIGHT = 11
+    HIP_LEFT = 12
+    KNEE_LEFT = 13
+    ANKLE_LEFT = 14
+    FOOT_LEFT = 15
+    HIP_RIGHT = 16
+    KNEE_RIGHT = 17
+    ANKLE_RIGHT = 18
+    FOOT_RIGHT = 19
+    SPINE_SHOULDER = 20
+    HAND_TIP_LEFT = 21
+    THUMB_LEFT = 22
+    HAND_TIP_RIGHT = 23
+    THUMB_RIGHT = 24
+    NONE = 25
+
+
+JOINT_PARENTS = {
+    JOINTS.SPINE_BASE: JOINTS.NONE,
+    JOINTS.SPINE_MID: JOINTS.SPINE_BASE,
+    JOINTS.HEAD: JOINTS.SPINE_MID,
+    JOINTS.SHOULDER_LEFT: JOINTS.SPINE_SHOULDER,
+    JOINTS.ELBOW_LEFT: JOINTS.SHOULDER_LEFT,
+    JOINTS.WRIST_LEFT: JOINTS.ELBOW_LEFT,
+    JOINTS.HAND_LEFT: JOINTS.WRIST_LEFT,
+    JOINTS.SHOULDER_RIGHT: JOINTS.SPINE_SHOULDER,
+    JOINTS.ELBOW_RIGHT: JOINTS.SHOULDER_RIGHT,
+    JOINTS.WRIST_RIGHT: JOINTS.ELBOW_RIGHT,
+    JOINTS.HAND_RIGHT: JOINTS.WRIST_RIGHT,
+    JOINTS.HIP_LEFT: JOINTS.SPINE_BASE,
+    JOINTS.KNEE_LEFT: JOINTS.HIP_LEFT,
+    JOINTS.ANKLE_LEFT: JOINTS.KNEE_LEFT,
+    JOINTS.FOOT_LEFT: JOINTS.ANKLE_LEFT,
+    JOINTS.HIP_RIGHT: JOINTS.SPINE_BASE,
+    JOINTS.KNEE_RIGHT: JOINTS.HIP_RIGHT,
+    JOINTS.ANKLE_RIGHT: JOINTS.KNEE_RIGHT,
+    JOINTS.FOOT_RIGHT: JOINTS.ANKLE_RIGHT,
+    JOINTS.SPINE_SHOULDER: JOINTS.SPINE_MID,
+    JOINTS.HAND_TIP_LEFT: JOINTS.HAND_LEFT,
+    JOINTS.THUMB_LEFT: JOINTS.HAND_LEFT,
+    JOINTS.HAND_TIP_RIGHT: JOINTS.HAND_RIGHT,
+    JOINTS.THUMB_RIGHT: JOINTS.HAND_RIGHT,
+    JOINTS.NONE: JOINTS.NONE
+}
+
+
+class SAMPLE_JOINTS(Enum):
+    HEAD = 1
+    NECK = 2
+    TORSO = 3
+    LEFT_SHOULDER = 4
+    LEFT_ELBOW = 5
+    RIGHT_SHOULDER = 6
+    RIGHT_ELBOW = 7
+    LEFT_HIP = 8
+    LEFT_KNEE = 9
+    RIGHT_HIP = 10
+    RIGHT_KNEE = 11
+    LEFT_HAND = 12
+    RIGHT_HAND = 13
+    LEFT_FOOT = 14
+    RIGHT_FOOT = 15
+
+
+SAMPLE_JOINT_PARENTS = {
+    SAMPLE_JOINTS.HEAD: SAMPLE_JOINTS.NECK,
+    SAMPLE_JOINTS.NECK: SAMPLE_JOINTS.TORSO,
+    SAMPLE_JOINTS.TORSO: SAMPLE_JOINTS.TORSO,
+    SAMPLE_JOINTS.LEFT_SHOULDER: SAMPLE_JOINTS.NECK,
+    SAMPLE_JOINTS.LEFT_ELBOW: SAMPLE_JOINTS.LEFT_SHOULDER,
+    SAMPLE_JOINTS.RIGHT_SHOULDER: SAMPLE_JOINTS.NECK,
+    SAMPLE_JOINTS.RIGHT_ELBOW: SAMPLE_JOINTS.RIGHT_SHOULDER,
+    SAMPLE_JOINTS.LEFT_HIP: SAMPLE_JOINTS.TORSO,
+    SAMPLE_JOINTS.LEFT_KNEE: SAMPLE_JOINTS.LEFT_HIP,
+    SAMPLE_JOINTS.RIGHT_HIP: SAMPLE_JOINTS.TORSO,
+    SAMPLE_JOINTS.RIGHT_KNEE: SAMPLE_JOINTS.RIGHT_HIP,
+    SAMPLE_JOINTS.LEFT_HAND: SAMPLE_JOINTS.LEFT_ELBOW,
+    SAMPLE_JOINTS.RIGHT_HAND: SAMPLE_JOINTS.RIGHT_ELBOW,
+    SAMPLE_JOINTS.LEFT_FOOT: SAMPLE_JOINTS.LEFT_KNEE,
+    SAMPLE_JOINTS.RIGHT_FOOT: SAMPLE_JOINTS.RIGHT_KNEE
+}
 
 
 class RenderSkeletonModule(AbstractMirrorModule):
@@ -18,9 +112,48 @@ class RenderSkeletonModule(AbstractMirrorModule):
     def mirror_tracking_data(self, data):
         super().mirror_tracking_data(data)
 
-        print('[info] Received tracking data %r' % data)
-        # do nothing with that
-        pass
+        print('[info] Received tracking data {}..'.format(data[0:50]))
+
+        # See http://pr.cs.cornell.edu/humanactivities/data.php for details
+        data = data.decode().split(",")
+        joints3D = [[0 for x in range(3)] for y in range(len(SAMPLE_JOINTS))]
+        j = 1
+        result = ''
+
+        if len(data) != 172:
+            print("len is {}".format(len(data)))
+            return
+
+        for i in range(11, 154, 14):
+            #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            self.Messaging.send_message(
+                'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            joints3D[j][0] = data[i]
+            joints3D[j][1] = data[i+1]
+            joints3D[j][2] = data[i+2]
+            j += 1
+        for i in range(155, 167, 4):
+            #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            self.Messaging.send_message(
+                'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            joints3D[j][0] = data[i]
+            joints3D[j][1] = data[i+1]
+            joints3D[j][2] = data[i+2]
+            j += 1
+
+        # Read the 2D-links from the joint-data for easy rendering
+        # Format x1, y1, x2, y2, x3, y3 ...
+        # For rendering: Draw line from P1 to P2, P3 to P4
+        #result = ''
+        #for joint in range(1, len(joints3D)):
+            # From
+        #    result += str(joints3D[joint][0]) + ',' + str(joints3D[joint][1]) + ','
+            # To
+        #    parent_joint = SAMPLE_JOINTS[SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]].value
+        #    result += str(joints3D[parent_joint][0]) + ',' + str(joints3D[parent_joint][1]) + ","
+
+        #print(result)
+
 
     def mirror_tracking_lost(self):
         super.mirror_tracking_lost()

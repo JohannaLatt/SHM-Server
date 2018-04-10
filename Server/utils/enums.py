@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MSG_FROM_MIRROR_KEYS(Enum):
     MIRROR_READY = 1
     MIRROR_TRACKING_STARTED = 2
@@ -9,3 +10,4 @@ class MSG_FROM_MIRROR_KEYS(Enum):
 
 class MSG_TO_MIRROR_KEYS(Enum):
     TEXT = 1
+    SKELETON = 2
