@@ -13,13 +13,13 @@ class AbstractMirrorModule(ABC):
         pass
 
     @abstractmethod
-    def mirror_tracking_started(self):
+    def tracking_started(self):
         pass
 
     @abstractmethod
-    def mirror_tracking_data(self, data):
+    def tracking_data(self, data):
         pass
 
     @abstractmethod
-    def mirror_tracking_lost(self):
+    def tracking_lost(self):
         pass

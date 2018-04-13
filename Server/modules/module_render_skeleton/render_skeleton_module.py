@@ -104,13 +104,13 @@ class RenderSkeletonModule(AbstractMirrorModule):
         # do nothing with that
         pass
 
-    def mirror_tracking_started(self):
-        super().mirror_tracking_started()
-        # do nothing with that
+    def tracking_started(self):
+        super().tracking_started()
+        print('[info] Tracking has started')
         pass
 
-    def mirror_tracking_data(self, data):
-        super().mirror_tracking_data(data)
+    def tracking_data(self, data):
+        super().tracking_data(data)
 
         print('[info] Received tracking data {}..'.format(data[0:50]))
 
@@ -118,10 +118,9 @@ class RenderSkeletonModule(AbstractMirrorModule):
         data = data.decode().split(",")
         joints3D = [[0 for x in range(3)] for y in range(len(SAMPLE_JOINTS))]
         j = 1
-        result = ''
 
         if len(data) != 172:
-            print("len is {}".format(len(data)))
+            print("[error] len of skeleton data is {}".format(len(data)))
             return
 
         for i in range(11, 154, 14):
@@ -147,15 +146,14 @@ class RenderSkeletonModule(AbstractMirrorModule):
         #result = ''
         #for joint in range(1, len(joints3D)):
             # From
-        #    result += str(joints3D[joint][0]) + ',' + str(joints3D[joint][1]) + ','
+            #result += str(joints3D[joint][0]) + ',' + str(joints3D[joint][1]) + ','
             # To
-        #    parent_joint = SAMPLE_JOINTS[SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]].value
-        #    result += str(joints3D[parent_joint][0]) + ',' + str(joints3D[parent_joint][1]) + ","
+            #parent_joint = SAMPLE_JOINTS[SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]].value
+            #result += str(joints3D[parent_joint][0]) + ',' + str(joints3D[parent_joint][1]) + ","
 
         #print(result)
 
-
-    def mirror_tracking_lost(self):
-        super.mirror_tracking_lost()
-        # do nothing with that
+    def tracking_lost(self):
+        super().tracking_lost()
+        print('[info] Tracking lost')
         pass
