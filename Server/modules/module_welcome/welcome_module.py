@@ -8,7 +8,7 @@ class WelcomeModule(AbstractMirrorModule):
 
     def mirror_started(self):
         super().mirror_started()
-        print("[info] Mirror is started")
+        print("[WelcomeModule][info] Mirror is started")
         self.Messaging.send_message(
             'TEXT', 'Server has receive the start-up message!')
 

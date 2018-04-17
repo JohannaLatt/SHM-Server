@@ -77,21 +77,21 @@ class SAMPLE_JOINTS(Enum):
 
 
 SAMPLE_JOINT_PARENTS = {
-    SAMPLE_JOINTS.HEAD: SAMPLE_JOINTS.NECK,
-    SAMPLE_JOINTS.NECK: SAMPLE_JOINTS.TORSO,
-    SAMPLE_JOINTS.TORSO: SAMPLE_JOINTS.TORSO,
-    SAMPLE_JOINTS.LEFT_SHOULDER: SAMPLE_JOINTS.NECK,
-    SAMPLE_JOINTS.LEFT_ELBOW: SAMPLE_JOINTS.LEFT_SHOULDER,
-    SAMPLE_JOINTS.RIGHT_SHOULDER: SAMPLE_JOINTS.NECK,
-    SAMPLE_JOINTS.RIGHT_ELBOW: SAMPLE_JOINTS.RIGHT_SHOULDER,
-    SAMPLE_JOINTS.LEFT_HIP: SAMPLE_JOINTS.TORSO,
-    SAMPLE_JOINTS.LEFT_KNEE: SAMPLE_JOINTS.LEFT_HIP,
-    SAMPLE_JOINTS.RIGHT_HIP: SAMPLE_JOINTS.TORSO,
-    SAMPLE_JOINTS.RIGHT_KNEE: SAMPLE_JOINTS.RIGHT_HIP,
-    SAMPLE_JOINTS.LEFT_HAND: SAMPLE_JOINTS.LEFT_ELBOW,
-    SAMPLE_JOINTS.RIGHT_HAND: SAMPLE_JOINTS.RIGHT_ELBOW,
-    SAMPLE_JOINTS.LEFT_FOOT: SAMPLE_JOINTS.LEFT_KNEE,
-    SAMPLE_JOINTS.RIGHT_FOOT: SAMPLE_JOINTS.RIGHT_KNEE
+    'HEAD': 2,
+    'NECK': 3,
+    'TORSO': 3,
+    'LEFT_SHOULDER': 2,
+    'LEFT_ELBOW': 4,
+    'RIGHT_SHOULDER': 2,
+    'RIGHT_ELBOW': 6,
+    'LEFT_HIP': 3,
+    'LEFT_KNEE': 8,
+    'RIGHT_HIP': 3,
+    'RIGHT_KNEE': 10,
+    'LEFT_HAND': 5,
+    'RIGHT_HAND': 7,
+    'LEFT_FOOT': 9,
+    'RIGHT_FOOT': 11
 }
 
 
@@ -106,13 +106,13 @@ class RenderSkeletonModule(AbstractMirrorModule):
 
     def tracking_started(self):
         super().tracking_started()
-        print('[info] Tracking has started')
+        print('[RenderSkeletonModule][info] Tracking has started')
         pass
 
     def tracking_data(self, data):
         super().tracking_data(data)
 
-        print('[info] Received tracking data {}..'.format(data[0:50]))
+        print('[RenderSkeletonModule][info] Received tracking data {}..'.format(data[0:50]))
 
         # See http://pr.cs.cornell.edu/humanactivities/data.php for details
         data = data.decode().split(",")
@@ -120,21 +120,21 @@ class RenderSkeletonModule(AbstractMirrorModule):
         j = 1
 
         if len(data) != 172:
-            print("[error] len of skeleton data is {}".format(len(data)))
+            print("[RenderSkeletonModule][error] len of skeleton data is {}".format(len(data)))
             return
 
         for i in range(11, 154, 14):
             #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
-            self.Messaging.send_message(
-                'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            #self.Messaging.send_message(
+            #    'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
             joints3D[j][0] = data[i]
             joints3D[j][1] = data[i+1]
             joints3D[j][2] = data[i+2]
             j += 1
         for i in range(155, 167, 4):
             #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
-            self.Messaging.send_message(
-                'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            #self.Messaging.send_message(
+            #    'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
             joints3D[j][0] = data[i]
             joints3D[j][1] = data[i+1]
             joints3D[j][2] = data[i+2]
@@ -143,17 +143,18 @@ class RenderSkeletonModule(AbstractMirrorModule):
         # Read the 2D-links from the joint-data for easy rendering
         # Format x1, y1, x2, y2, x3, y3 ...
         # For rendering: Draw line from P1 to P2, P3 to P4
-        #result = ''
-        #for joint in range(1, len(joints3D)):
+        result = ''
+        for joint in range(1, len(joints3D)):
             # From
-            #result += str(joints3D[joint][0]) + ',' + str(joints3D[joint][1]) + ','
+            result += str(joints3D[joint][0]) + ',' + str(joints3D[joint][1]) + ','
             # To
-            #parent_joint = SAMPLE_JOINTS[SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]].value
-            #result += str(joints3D[parent_joint][0]) + ',' + str(joints3D[parent_joint][1]) + ","
+            parent_joint = SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]
+            result += str(joints3D[parent_joint][0]) + ',' + str(joints3D[parent_joint][1]) + ","
 
-        #print(result)
+        print("[RenderSkeletonModule][info] Sending render result to mirror: {}".format(result))
+        self.Messaging.send_message('RENDER SKELETON', result)
 
     def tracking_lost(self):
         super().tracking_lost()
-        print('[info] Tracking lost')
+        print('[RenderSkeletonModule][info] Tracking lost')
         pass

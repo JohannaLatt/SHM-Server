@@ -15,7 +15,7 @@ def consume_mirror_message(ch, method, properties, body):
         for module in ModuleManager.modules:
             module.mirror_started()
     else:
-        print('Received unknown key {}'.format(method.routing_key))
+        print('[Messaging][warning] Received unknown key {}'.format(method.routing_key))
 
 
 # Callback for consuming incoming messages from the Kinect
@@ -31,7 +31,7 @@ def consume_kinect_message(ch, method, properties, body):
         for module in ModuleManager.modules:
             module.tracking_lost()
     else:
-        print('Received unknown key {}'.format(method.routing_key))
+        print('[Messaging][warning] Received unknown key {}'.format(method.routing_key))
 
 
 def init():
@@ -89,7 +89,7 @@ def start_consuming():
     try:
         __channel_consuming.start_consuming()
     except pika.exceptions.ConnectionClosed as cce:
-        print('[error] %r' % cce)
+        print('[Messaging][error] %r' % cce)
 
 
 # Threadsafe sending of messages
@@ -104,7 +104,7 @@ def start_sending():
                               body=item['body'])
             #print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
         except pika.exceptions.ConnectionClosed as cce:
-            print('[error] %r' % cce)
+            print('[Messaging - error] %r' % cce)
         __queue.task_done()
 
 
@@ -113,6 +113,6 @@ def send_message(key, body):
         init()
 
     if key not in MSG_TO_MIRROR_KEYS.__members__:
-        print("[error] %r is not a valid message key to send to the mirror" % key)
+        print("[Messaging][error] %r is not a valid message key to send to the mirror" % key)
     else:
         __queue.put({'key': key, 'body': body})

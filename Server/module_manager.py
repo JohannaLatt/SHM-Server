@@ -9,7 +9,7 @@ def initiate_modules(Messaging):
     Config = configparser.ConfigParser()
     Config.read('./config/mirror_config.ini')
     module_config_names = Config.get('General', 'module_names').split(',')
-    print("Module config names: %r" % module_config_names)
+    print("[ModuleManager][info] Module config names: %r" % module_config_names)
     for module_config_name in module_config_names:
         module_path = Config.get(module_config_name.strip(), 'path_name').strip()
         module_class = Config.get(module_config_name.strip(), 'class_name').strip()
