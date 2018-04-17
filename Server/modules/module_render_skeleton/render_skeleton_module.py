@@ -1,5 +1,8 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
+from Server.utils.enums import MSG_TO_MIRROR_KEYS
 from enum import Enum
+import json
+
 
 class JOINTS(Enum):
     SPINE_BASE = 0
@@ -143,16 +146,23 @@ class RenderSkeletonModule(AbstractMirrorModule):
         # Read the 2D-links from the joint-data for easy rendering
         # Format x1, y1, x2, y2, x3, y3 ...
         # For rendering: Draw line from P1 to P2, P3 to P4
-        result = ''
+        result = []
         for joint in range(1, len(joints3D)):
-            # From
-            result += str(joints3D[joint][0]) + ',' + str(joints3D[joint][1]) + ','
-            # To
+            # First get the parent joint (the 'to'-joint)
             parent_joint = SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]
-            result += str(joints3D[parent_joint][0]) + ',' + str(joints3D[parent_joint][1]) + ","
 
-        print("[RenderSkeletonModule][info] Sending render result to mirror: {}".format(result))
-        self.Messaging.send_message('RENDER SKELETON', result)
+            # Save the result
+            # Format for from a to b: [(ax, ay), (bx, by)]
+            from_to = []
+            from_to.append((joints3D[joint][0], joints3D[joint][1]))
+            from_to.append((joints3D[parent_joint][0], joints3D[parent_joint][1]))
+
+            # Append to result
+            result.append(from_to)
+
+        result_str = json.dumps(result)
+        print("[RenderSkeletonModule][info] Sending render result to mirror: {}".format(result_str))
+        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.RENDER_SKELETON.name, result_str)
 
     def tracking_lost(self):
         super().tracking_lost()

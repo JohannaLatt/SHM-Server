@@ -1,4 +1,5 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
+from Server.utils.enums import MSG_TO_MIRROR_KEYS
 
 
 class WelcomeModule(AbstractMirrorModule):
@@ -10,7 +11,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().mirror_started()
         print("[WelcomeModule][info] Mirror is started")
         self.Messaging.send_message(
-            'TEXT', 'Server has receive the start-up message!')
+            MSG_TO_MIRROR_KEYS.TEXT.name, 'Server has receive the start-up message!')
 
     def tracking_started(self):
         super().tracking_started()
