@@ -152,10 +152,10 @@ class RenderSkeletonModule(AbstractMirrorModule):
             parent_joint = SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]
 
             # Save the result
-            # Format for from a to b: [(ax, ay), (bx, by)]
+            # Format for from a to b: [(ax, bx), (ay, by)]
             from_to = []
-            from_to.append((joints3D[joint][0], joints3D[joint][1]))
-            from_to.append((joints3D[parent_joint][0], joints3D[parent_joint][1]))
+            from_to.append((joints3D[joint][0], joints3D[parent_joint][0]))
+            from_to.append((joints3D[joint][1], joints3D[parent_joint][1]))
 
             # Append to result
             result.append(from_to)
