@@ -119,7 +119,10 @@ class RenderSkeletonModule(AbstractMirrorModule):
 
         # See http://pr.cs.cornell.edu/humanactivities/data.php for details
         data = data.decode().split(",")
-        joints3D = [[0 for x in range(3)] for y in range(len(SAMPLE_JOINTS))]
+
+        # Create joints data-structure which is a list of three coordinates
+        # that is filled with zeros at first: [[0,0,0][0,0,0][0,0,0]...]
+        joints3D = [[0 for x in range(3)] for y in range(len(SAMPLE_JOINTS) + 1)]
         j = 1
 
         if len(data) != 172:
@@ -128,24 +131,18 @@ class RenderSkeletonModule(AbstractMirrorModule):
 
         for i in range(11, 154, 14):
             #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
-            #self.Messaging.send_message(
-            #    'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
             joints3D[j][0] = data[i]
             joints3D[j][1] = data[i+1]
             joints3D[j][2] = data[i+2]
             j += 1
-        for i in range(155, 167, 4):
+        for i in range(155, 168, 4):
             #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
-            #self.Messaging.send_message(
-            #    'SKELETON', 'Render joint:' + "{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
             joints3D[j][0] = data[i]
             joints3D[j][1] = data[i+1]
             joints3D[j][2] = data[i+2]
             j += 1
 
         # Read the 2D-links from the joint-data for easy rendering
-        # Format x1, y1, x2, y2, x3, y3 ...
-        # For rendering: Draw line from P1 to P2, P3 to P4
         result = []
         for joint in range(1, len(joints3D)):
             # First get the parent joint (the 'to'-joint)
