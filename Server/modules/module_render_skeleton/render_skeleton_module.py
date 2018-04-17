@@ -158,7 +158,6 @@ class RenderSkeletonModule(AbstractMirrorModule):
             result.append(from_to)
 
         result_str = json.dumps(result)
-        print("[RenderSkeletonModule][info] Sending render result to mirror: {}".format(result_str))
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.RENDER_SKELETON.name, result_str)
 
     def tracking_lost(self):
