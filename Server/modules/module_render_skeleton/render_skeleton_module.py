@@ -116,7 +116,7 @@ class RenderSkeletonModule(AbstractMirrorModule):
     def tracking_data(self, data):
         super().tracking_data(data)
 
-        print('[RenderSkeletonModule][info] Received tracking data {}..'.format(data[0:50]))
+        # print('[RenderSkeletonModule][info] Received tracking data {}..'.format(data[0:50]))
 
         # See http://pr.cs.cornell.edu/humanactivities/data.php for details
         data = data.split(",")
@@ -131,13 +131,13 @@ class RenderSkeletonModule(AbstractMirrorModule):
             return
 
         for i in range(11, 154, 14):
-            #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            # print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
             joints3D[j][0] = data[i]
             joints3D[j][1] = data[i+1]
             joints3D[j][2] = data[i+2]
             j += 1
         for i in range(155, 168, 4):
-            #print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
+            # print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
             joints3D[j][0] = data[i]
             joints3D[j][1] = data[i+1]
             joints3D[j][2] = data[i+2]

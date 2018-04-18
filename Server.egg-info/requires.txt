@@ -2,4 +2,4 @@ flask
 ConfigParser
 pika
 importlib
-enum
+amqpstorm
