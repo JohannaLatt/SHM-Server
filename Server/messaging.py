@@ -1,52 +1,68 @@
-import pika
 from Server.utils.enums import MSG_FROM_MIRROR_KEYS
 from Server.utils.enums import MSG_FROM_KINECT_KEYS
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
+
 from Server import module_manager as ModuleManager
+
+from amqpstorm import Connection
+
 import configparser
 import queue
 
 
 # Callback for consuming incoming messages from the Mirror
-def consume_mirror_message(ch, method, properties, body):
-    # print(" [info] %r:%r" % (method.routing_key, body))
-    # Call module callbacks depending on incoming message
-    if method.routing_key == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
+def consume_mirror_message(message):
+    if message.method['routing_key'] == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
         for module in ModuleManager.modules:
             module.mirror_started()
     else:
-        print('[Messaging][warning] Received unknown key {}'.format(method.routing_key))
+        print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
 
 # Callback for consuming incoming messages from the Kinect
-def consume_kinect_message(ch, method, properties, body):
+def consume_kinect_message(message):
     # Call module callbacks depending on incoming message
-    if method.routing_key == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
+    if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
         for module in ModuleManager.modules:
             module.tracking_started()
-    elif method.routing_key == MSG_FROM_KINECT_KEYS.TRACKING_DATA.name:
+    elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_DATA.name:
         for module in ModuleManager.modules:
-            module.tracking_data(body)
-    elif method.routing_key == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
+            module.tracking_data(message.body)
+    elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
         for module in ModuleManager.modules:
             module.tracking_lost()
     else:
-        print('[Messaging][warning] Received unknown key {}'.format(method.routing_key))
+        print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
 
 def init():
     # Create a local messaging connection
     Config = configparser.ConfigParser()
     Config.read('./config/mirror_config.ini')
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=Config.get('General', 'messaging_ip')))
+    connection = Connection(Config.get('General', 'messaging_ip'), 'guest', 'guest')
 
     global __channel_consuming
     global __channel_sending
     __channel_consuming = connection.channel()
     __channel_sending = connection.channel()
 
+    _initiate_messaging_to_mirror()
+    _initiate_message_consuming()
 
-def initiate_message_consuming():
+
+def _initiate_messaging_to_mirror():
+    if __channel_sending is None:
+        init()
+
+    # Save the queue
+    global __queue
+    __queue = queue.Queue()
+
+    # Create an exchange for the mirror-messages - type is direct so we can distinguish the different messages
+    __channel_sending.exchange.declare(exchange='to-mirror', exchange_type='direct')
+
+
+def _initiate_message_consuming():
     if __channel_consuming is None:
         init()
 
@@ -56,40 +72,25 @@ def initiate_message_consuming():
 
 def __initiate_messaging_from_outside(name, keys, consume_callback):
     # Create an exchange for the messages of the exchange with 'name'
-    __channel_consuming.exchange_declare(exchange=name, exchange_type='direct')
+    __channel_consuming.exchange.declare(exchange=name, exchange_type='direct')
 
     # Declare a __queue to be used (random name will be used)
-    result = __channel_consuming.queue_declare(exclusive=True)
-    queue_name = result.method.queue
+    result = __channel_consuming.queue.declare(exclusive=True)
+    queue_name = result['queue']
 
     # Listen to the messages with the given keys
     for msg_keys in keys:
-        __channel_consuming.queue_bind(exchange=name,
+        __channel_consuming.queue.bind(exchange=name,
                            queue=queue_name,
                            routing_key=msg_keys.name)
 
-    __channel_consuming.basic_consume(consume_callback,
+    __channel_consuming.basic.consume(consume_callback,
                           queue=queue_name,
                           no_ack=True)
 
 
-def initiate_messaging_to_mirror():
-    if __channel_sending is None:
-        init()
-
-    # Save the queue
-    global __queue
-    __queue = queue.Queue()
-
-    # Create an exchange for the mirror-messages - type is direct so we can distinguish the different messages
-    __channel_sending.exchange_declare(exchange='to-mirror', exchange_type='direct')
-
-
 def start_consuming():
-    try:
-        __channel_consuming.start_consuming()
-    except pika.exceptions.ConnectionClosed as cce:
-        print('[Messaging][error] %r' % cce)
+    __channel_consuming.start_consuming()
 
 
 # Threadsafe sending of messages
@@ -98,13 +99,10 @@ def start_sending():
         item = __queue.get()
         if item is None:
             continue
-        try:
-            __channel_sending.basic_publish(exchange='to-mirror',
-                              routing_key=item['key'],
-                              body=item['body'])
+        __channel_sending.basic.publish(exchange='to-mirror',
+                          routing_key=item['key'],
+                          body=item['body'])
             #print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
-        except pika.exceptions.ConnectionClosed as cce:
-            print('[Messaging - error] %r' % cce)
         __queue.task_done()
 
 

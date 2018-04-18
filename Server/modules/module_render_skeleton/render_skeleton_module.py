@@ -1,5 +1,6 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
+
 from enum import Enum
 import json
 
@@ -118,7 +119,7 @@ class RenderSkeletonModule(AbstractMirrorModule):
         print('[RenderSkeletonModule][info] Received tracking data {}..'.format(data[0:50]))
 
         # See http://pr.cs.cornell.edu/humanactivities/data.php for details
-        data = data.decode().split(",")
+        data = data.split(",")
 
         # Create joints data-structure which is a list of three coordinates
         # that is filled with zeros at first: [[0,0,0][0,0,0][0,0,0]...]

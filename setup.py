@@ -9,6 +9,6 @@ setup(
         'ConfigParser',
         'pika',
         'importlib',
-        'enum'
+        'amqpstorm'
     ],
 )
