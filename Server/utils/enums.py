@@ -17,3 +17,4 @@ class MSG_FROM_KINECT_KEYS(Enum):
 class MSG_TO_MIRROR_KEYS(Enum):
     TEXT = 1
     RENDER_SKELETON = 2
+    CLEAR_SKELETON = 3

@@ -164,4 +164,5 @@ class RenderSkeletonModule(AbstractMirrorModule):
     def tracking_lost(self):
         super().tracking_lost()
         print('[RenderSkeletonModule][info] Tracking lost')
+        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.CLEAR_SKELETON.name, '')
         pass

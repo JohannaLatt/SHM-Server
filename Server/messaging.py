@@ -21,6 +21,7 @@ def consume_mirror_message(message):
 
 # Callback for consuming incoming messages from the Kinect
 def consume_kinect_message(message):
+    print("Message ID {}".format(message.delivery_tag))
     # Call module callbacks depending on incoming message
     if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
         for module in ModuleManager.modules:
@@ -102,7 +103,7 @@ def start_sending():
         __channel_sending.basic.publish(exchange='to-mirror',
                           routing_key=item['key'],
                           body=item['body'])
-            #print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
+        # print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
         __queue.task_done()
 
 
@@ -113,4 +114,6 @@ def send_message(key, body):
     if key not in MSG_TO_MIRROR_KEYS.__members__:
         print("[Messaging][error] %r is not a valid message key to send to the mirror" % key)
     else:
+        if key == MSG_TO_MIRROR_KEYS.CLEAR_SKELETON.name:
+            __queue.queue.clear()
         __queue.put({'key': key, 'body': body})
