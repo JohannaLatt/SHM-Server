@@ -1,6 +1,8 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
 
+import json
+
 
 class WelcomeModule(AbstractMirrorModule):
 
@@ -11,7 +13,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().mirror_started()
         print("[WelcomeModule][info] Mirror is started")
         self.Messaging.send_message(
-            MSG_TO_MIRROR_KEYS.TEXT.name, 'Welcome!')
+            MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Welcome!", "position": "center"}))
 
     def tracking_started(self):
         super().tracking_started()
