@@ -11,7 +11,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().mirror_started()
         print("[WelcomeModule][info] Mirror is started")
         self.Messaging.send_message(
-            MSG_TO_MIRROR_KEYS.TEXT.name, 'Server has receive the start-up message!')
+            MSG_TO_MIRROR_KEYS.TEXT.name, 'Welcome!')
 
     def tracking_started(self):
         super().tracking_started()
