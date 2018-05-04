@@ -10,11 +10,23 @@ import configparser
 import queue
 
 
+# The format in which messages are shared accross the service
+class MirrorMessage:
+    def __init__(self, key, body):
+        self.key = key
+        self.body = body
+
+
+# The queue that saves incoming messages
+mirror_msg_queue = queue.Queue()
+
+
 # Callback for consuming incoming messages from the Mirror
 def consume_mirror_message(message):
     if message.method['routing_key'] == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
-        for module in ModuleManager.modules:
-            module.mirror_started()
+        mirror_msg_queue.put(MirrorMessage(MSG_FROM_MIRROR_KEYS.MIRROR_READY.name, ''))
+        #for module in ModuleManager.modules:
+            # module.mirror_started()
     else:
         print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
@@ -23,14 +35,17 @@ def consume_mirror_message(message):
 def consume_kinect_message(message):
     # Call module callbacks depending on incoming message
     if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
-        for module in ModuleManager.modules:
-            module.tracking_started()
+        mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name, ''))
+        #for module in ModuleManager.modules:
+            # module.tracking_started()
     elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_DATA.name:
-        for module in ModuleManager.modules:
-            module.tracking_data(message.body)
+        mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_DATA.name, message.body))
+        # for module in ModuleManager.modules:
+            # module.tracking_data(message.body)
     elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
-        for module in ModuleManager.modules:
-            module.tracking_lost()
+        mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_LOST.name, ''))
+        # for module in ModuleManager.modules:
+            # module.tracking_lost()
     else:
         print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
@@ -100,8 +115,8 @@ def start_sending():
         if item is None:
             continue
         __channel_sending.basic.publish(exchange='to-mirror',
-                          routing_key=item['key'],
-                          body=item['body'])
+                          routing_key=item.key,
+                          body=item.body)
         # print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
         __queue.task_done()
 
@@ -115,4 +130,4 @@ def send_message(key, body):
     else:
         if key == MSG_TO_MIRROR_KEYS.CLEAR_SKELETON.name:
             __queue.queue.clear()
-        __queue.put({'key': key, 'body': body})
+        __queue.put(MirrorMessage(key, body))
