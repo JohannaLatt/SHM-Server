@@ -25,8 +25,6 @@ mirror_msg_queue = queue.Queue()
 def consume_mirror_message(message):
     if message.method['routing_key'] == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
         mirror_msg_queue.put(MirrorMessage(MSG_FROM_MIRROR_KEYS.MIRROR_READY.name, ''))
-        #for module in ModuleManager.modules:
-            # module.mirror_started()
     else:
         print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
@@ -36,16 +34,10 @@ def consume_kinect_message(message):
     # Call module callbacks depending on incoming message
     if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
         mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name, ''))
-        #for module in ModuleManager.modules:
-            # module.tracking_started()
     elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_DATA.name:
         mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_DATA.name, message.body))
-        # for module in ModuleManager.modules:
-            # module.tracking_data(message.body)
     elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
         mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_LOST.name, ''))
-        # for module in ModuleManager.modules:
-            # module.tracking_lost()
     else:
         print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
