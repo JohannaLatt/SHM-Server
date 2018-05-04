@@ -61,6 +61,24 @@ JOINT_PARENTS = {
     JOINTS.NONE: JOINTS.NONE
 }
 
+JOINT_PARENTS = {
+    'SpineBase': 2,
+    'SpineMid': 3,
+    'Neck': 3,
+    'Head': 2,
+    'LEFT_ELBOW': 4,
+    'RIGHT_SHOULDER': 2,
+    'RIGHT_ELBOW': 6,
+    'LEFT_HIP': 3,
+    'LEFT_KNEE': 8,
+    'RIGHT_HIP': 3,
+    'RIGHT_KNEE': 10,
+    'LEFT_HAND': 5,
+    'RIGHT_HAND': 7,
+    'LEFT_FOOT': 9,
+    'RIGHT_FOOT': 11
+}
+
 
 class SAMPLE_JOINTS(Enum):
     HEAD = 1
@@ -115,45 +133,21 @@ class RenderSkeletonModule(AbstractMirrorModule):
 
     def tracking_data(self, data):
         super().tracking_data(data)
+        #print('[RenderSkeletonModule][info] Tracking received: {}'.format(data))
 
-        # print('[RenderSkeletonModule][info] Received tracking data {}..'.format(data[0:50]))
+        # Load string as json
+        data = json.loads(data)["joint_data"]
 
-        # See http://pr.cs.cornell.edu/humanactivities/data.php for details
-        data = data.split(",")
-
-        # Create joints data-structure which is a list of three coordinates
-        # that is filled with zeros at first: [[0,0,0][0,0,0][0,0,0]...]
-        joints3D = [[0 for x in range(3)] for y in range(len(SAMPLE_JOINTS) + 1)]
-        j = 1
-
-        if len(data) != 172:
-            print("[RenderSkeletonModule][error] len of skeleton data is {}".format(len(data)))
-            return
-
-        for i in range(11, 154, 14):
-            # print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
-            joints3D[j][0] = data[i]
-            joints3D[j][1] = data[i+1]
-            joints3D[j][2] = data[i+2]
-            j += 1
-        for i in range(155, 168, 4):
-            # print("{}: {}, {}, {}".format(SAMPLE_JOINTS(j).name, data[i], data[i+1], data[i+2]))
-            joints3D[j][0] = data[i]
-            joints3D[j][1] = data[i+1]
-            joints3D[j][2] = data[i+2]
-            j += 1
-
-        # Read the 2D-links from the joint-data for easy rendering
+        # Reformat the joint data into bone data to send for rendering
         result = []
-        for joint in range(1, len(joints3D)):
-            # First get the parent joint (the 'to'-joint)
-            parent_joint = SAMPLE_JOINT_PARENTS[SAMPLE_JOINTS(joint).name]
+        for joint, joint_data in data.items():
+            from_p = joint_data["joint_position"]
+            to_p = data[joint_data["joint_parent"]]["joint_position"]
 
-            # Save the result
             # Format for from a to b: [(ax, ay, az), (bx, by, bz)]
             from_to = []
-            from_to.append((joints3D[joint][0], joints3D[joint][1], joints3D[joint][2]))
-            from_to.append((joints3D[parent_joint][0], joints3D[parent_joint][1], joints3D[parent_joint][2]))
+            from_to.append((from_p["x"], from_p["y"], from_p["z"]))
+            from_to.append((to_p["x"], to_p["y"], to_p["z"]))
 
             # Append to result
             result.append(from_to)

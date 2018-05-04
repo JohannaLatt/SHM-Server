@@ -21,6 +21,7 @@ def consume_mirror_message(message):
 
 # Callback for consuming incoming messages from the Kinect
 def consume_kinect_message(message):
+    print("Received msg: {}".format(message.delivery_tag))
     # Call module callbacks depending on incoming message
     if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
         for module in ModuleManager.modules:
