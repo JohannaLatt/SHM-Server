@@ -13,7 +13,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().mirror_started()
         print("[WelcomeModule][info] Mirror is started")
         self.Messaging.send_message(
-            MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Welcome!", "position": "center"}))
+            MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Welcome!", "position": 1}))
 
     def tracking_started(self):
         super().tracking_started()
