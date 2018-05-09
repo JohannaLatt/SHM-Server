@@ -2,21 +2,24 @@ from flask import Flask
 
 import threading
 
-from Server import messaging as Messaging
-from Server import module_manager as ModuleManager
+from Server.messaging import Messaging
+from Server.module_manager import ModuleManager
 
 PORT = 5001
-
 app = Flask(__name__)
 
-Messaging.init()
-thread = threading.Thread(target=Messaging.start_sending)
+# Initiate the messaging
+messaging = Messaging()
+
+# Initiate the modules before starting to consume messages
+module_manager = ModuleManager(messaging)
+
+# Start sending and consuming
+thread = threading.Thread(target=messaging.start_sending)
 thread.daemon = True
 thread.start()
 
-# Initiate the modules before starting to consume messages
-ModuleManager.initiate_modules(Messaging)
-thread = threading.Thread(target=Messaging.start_consuming)
+thread = threading.Thread(target=messaging.start_consuming)
 thread.daemon = True
 thread.start()
 

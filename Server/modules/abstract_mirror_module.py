@@ -6,10 +6,10 @@ from Server.utils.enums import MSG_FROM_KINECT_KEYS
 
 class AbstractMirrorModule(ABC):
 
-    @abstractmethod
-    def __init__(self, Messaging):
+    def __init__(self, Messaging, queue):
         super().__init__()
         self.Messaging = Messaging
+        self.__queue = queue
 
     @abstractmethod
     def mirror_started(self):
@@ -29,7 +29,8 @@ class AbstractMirrorModule(ABC):
 
     def run(self):
         while True:
-            item = self.Messaging.mirror_msg_queue.get()
+            item = self.__queue.get()
+
             if item is None:
                 continue
 
@@ -41,3 +42,5 @@ class AbstractMirrorModule(ABC):
                 self.tracking_data(item.body)
             elif item.key == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
                 self.tracking_lost()
+
+            self.__queue.task_done()

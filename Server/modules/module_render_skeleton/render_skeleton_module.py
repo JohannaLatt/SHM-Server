@@ -6,21 +6,18 @@ import json
 
 class RenderSkeletonModule(AbstractMirrorModule):
 
-    def __init__(self, Messaging):
-        super().__init__(Messaging)
-
     def mirror_started(self):
         # do nothing with that
         pass
 
     def tracking_started(self):
         super().tracking_started()
-        print('[RenderSkeletonModule][info] Tracking has started')
-        pass
+        x = "mayve I need to do something"
+        print('[RenderSkeletonModule][info] Tracking has started {}'.format(x))
 
     def tracking_data(self, data):
         super().tracking_data(data)
-        print('[RenderSkeletonModule][info] Tracking received: {}'.format(data))
+        # print('[RenderSkeletonModule][info] Tracking received: {}'.format(data))
 
         # Load string as json
         data = json.loads(data)["joint_data"]
@@ -46,4 +43,3 @@ class RenderSkeletonModule(AbstractMirrorModule):
         super().tracking_lost()
         print('[RenderSkeletonModule][info] Tracking lost')
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.CLEAR_SKELETON.name, '')
-        pass

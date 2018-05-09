@@ -6,9 +6,6 @@ import json
 
 class WelcomeModule(AbstractMirrorModule):
 
-    def __init__(self, Messaging):
-        super().__init__(Messaging)
-
     def mirror_started(self):
         super().mirror_started()
         print("[WelcomeModule][info] Mirror is started")
