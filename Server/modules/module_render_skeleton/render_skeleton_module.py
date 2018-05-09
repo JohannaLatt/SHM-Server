@@ -12,8 +12,7 @@ class RenderSkeletonModule(AbstractMirrorModule):
 
     def tracking_started(self):
         super().tracking_started()
-        x = "mayve I need to do something"
-        print('[RenderSkeletonModule][info] Tracking has started {}'.format(x))
+        print('[RenderSkeletonModule][info] Tracking has started")
 
     def tracking_data(self, data):
         super().tracking_data(data)
