@@ -63,7 +63,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
             if self.is_upper_body_straight_during_squat(spine_shoulder, spine_mid, spine_base):
                 if (self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]) > self.threshold_movement_in_y:
                     self.squatting = True
-                    self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Squatting!! Keep on going!", "position": 1}))
+                    #self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Squatting!! Keep on going!", "position": 1}))
                     print("SQUATTING")
 
                 if self.squatting is True and abs(self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]) < self.threshold_equal_y_pos:
@@ -73,7 +73,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                             self.squat_completed = True
                             self.repetitions += 1
                             print("SQUAT COMPLETE")
-                            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Repetitions: {}".format(self.repetitions), "position": 1}))
+                            #self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Repetitions: {}".format(self.repetitions), "position": 1}))
                         else:
                             self.squat_completed = False
                     else:
