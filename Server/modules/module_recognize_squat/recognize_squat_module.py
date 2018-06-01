@@ -63,7 +63,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
             if self.is_upper_body_straight_during_squat(spine_shoulder, spine_mid, spine_base):
                 if (self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]) > self.threshold_movement_in_y:
                     self.squatting = True
-                    #self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Squatting!! Keep on going!", "position": 1}))
+                    self.send_to_mirror("squat_text", "Squatting!! Keep on going!")
                     print("SQUATTING")
 
                 if self.squatting is True and abs(self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]) < self.threshold_equal_y_pos:
@@ -73,21 +73,51 @@ class RecognizeSquatModule(AbstractMirrorModule):
                             self.squat_completed = True
                             self.repetitions += 1
                             print("SQUAT COMPLETE")
-                            #self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({"text": "Repetitions: {}".format(self.repetitions), "position": 1}))
+                            self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
                         else:
                             self.squat_completed = False
                     else:
                         print("SQUAT FAILED - walked away")
+                        self.send_to_mirror("squat_text", "Squat failed - resetting")
                         self.squatting = False
                         self.squat_started = False
+                        self.repetitions = 0
+                        self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
 
                 self.last_spine_shoulder_pos = spine_shoulder
             else:
                 print("SQUAT FAILED - not straight")
+                self.send_to_mirror("squat_text", "Squat failed - resetting", 2)
                 self.squatting = False
                 self.squat_started = False
+                self.repetitions = 0
+                self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
 
         self.last_spine_base = spine_base
+
+    def send_to_mirror(self, id, text, time_out=10000):
+        if id == "squat_text":
+            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
+                json.dumps({
+                 "text": text,
+                 "id": id,
+                 "position": (0.5, 0.8),
+                 "animation": {
+                     "fade_in": 0.3,
+                     "stay": 2,
+                     "fade_out": time_out}
+                 }))
+        elif id == "squat_repetitions":
+            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
+                json.dumps({
+                 "text": "Repetitions: {}".format(self.repetitions),
+                 "id": id,
+                 "position": (0.1, 0.1),
+                 "animation": {
+                     "fade_in": 0.5,
+                     "stay": 2,
+                     "fade_out": time_out}
+                }))
 
     # Checks if the upper body is straight while the user is not moving
     def is_upper_body_straight(self, spine_shoulder, spine_mid, spine_base):
