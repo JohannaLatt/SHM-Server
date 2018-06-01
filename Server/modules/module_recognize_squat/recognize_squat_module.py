@@ -13,8 +13,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
     threshold_straight_squatting_x = 60
 
     threshold_in_place_x = 140
-    threshold_equal_y_pos = 30
-    threshold_movement_in_y = 30
+    threshold_equal_y_pos = 20
+    threshold_movement_in_y = 40
 
     def __init__(self, Messaging, queue):
         super().__init__(Messaging, queue)
@@ -69,33 +69,31 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 if self.squatting is True and abs(self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]) < self.threshold_equal_y_pos:
                     # Make sure the person didn't walk/move somewhere else
                     if abs(self.starting_spine_base_pos["x"] - spine_base["x"]) < self.threshold_in_place_x:
-                        if not self.squat_completed:
-                            self.squat_completed = True
-                            self.repetitions += 1
-                            print("SQUAT COMPLETE")
-                            self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
-                        else:
-                            self.squat_completed = False
+                        self.squatting = False
+                        self.repetitions += 1
+                        print("SQUAT COMPLETE")
+                        self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
+
                     else:
                         print("SQUAT FAILED - walked away")
-                        self.send_to_mirror("squat_text", "Squat failed - resetting")
+                        self.send_to_mirror("squat_text", "Squat failed, you walked - resetting", 2)
                         self.squatting = False
                         self.squat_started = False
                         self.repetitions = 0
-                        self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
+                        self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions), 1)
 
                 self.last_spine_shoulder_pos = spine_shoulder
             else:
                 print("SQUAT FAILED - not straight")
-                self.send_to_mirror("squat_text", "Squat failed - resetting", 2)
+                self.send_to_mirror("squat_text", "Squat failed, your back has to be straight - resetting", 2)
                 self.squatting = False
                 self.squat_started = False
                 self.repetitions = 0
-                self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
+                self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions), 1)
 
         self.last_spine_base = spine_base
 
-    def send_to_mirror(self, id, text, time_out=10000):
+    def send_to_mirror(self, id, text, stay=10000):
         if id == "squat_text":
             self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
                 json.dumps({
@@ -104,8 +102,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
                  "position": (0.5, 0.8),
                  "animation": {
                      "fade_in": 0.3,
-                     "stay": 2,
-                     "fade_out": time_out}
+                     "stay": stay,
+                     "fade_out": 1}
                  }))
         elif id == "squat_repetitions":
             self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
@@ -115,8 +113,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
                  "position": (0.1, 0.1),
                  "animation": {
                      "fade_in": 0.5,
-                     "stay": 2,
-                     "fade_out": time_out}
+                     "stay": stay,
+                     "fade_out": 1}
                 }))
 
     # Checks if the upper body is straight while the user is not moving
@@ -142,3 +140,5 @@ class RecognizeSquatModule(AbstractMirrorModule):
     def tracking_lost(self):
         super().tracking_lost()
         self.__reset_variables()
+        self.send_to_mirror("squat_repetitions", "", 0)
+        self.send_to_mirror("squat_text", "", 0)
