@@ -6,10 +6,11 @@ from Server.utils.enums import MSG_FROM_KINECT_KEYS
 
 class AbstractMirrorModule(ABC):
 
-    def __init__(self, Messaging, queue):
+    def __init__(self, Messaging, queue, User):
         super().__init__()
         self.Messaging = Messaging
         self.__queue = queue
+        self.User = User
 
     @abstractmethod
     def mirror_started(self):
