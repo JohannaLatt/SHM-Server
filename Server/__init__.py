@@ -8,6 +8,10 @@ from Server.module_manager import ModuleManager
 PORT = 5001
 app = Flask(__name__)
 
+@app.route("/")
+def hello():
+    return "Hello World!"
+
 # Initiate the messaging
 messaging = Messaging()
 
