@@ -15,8 +15,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
 
     threshold_straight_squatting_x = 60
 
-    threshold_in_place_x = 250
-    threshold_in_place_z = 400
+    threshold_in_place_x = 350
+    threshold_in_place_z = 600
     threshold_equal_y_pos = 20
     threshold_movement_in_y = 80
 
@@ -155,7 +155,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                      "fade_out": 1}
                  }))
         elif id == "squat_repetitions":
-            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT .name,
+            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
                 json.dumps({
                  "text": "Repetitions: {}".format(self.repetitions),
                  "id": id,

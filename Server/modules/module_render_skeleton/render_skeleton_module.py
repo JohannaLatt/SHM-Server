@@ -47,9 +47,11 @@ class RenderSkeletonModule(AbstractMirrorModule):
                                         joint_data["joint_position"]['y'],
                                         joint_data["joint_position"]['z']
                                        ]
+        self.User.update_joints(result['Joints'])
 
         # Bones
         result['Bones'] = KinectBoneMapping
+        self.User.update_bones(result['Bones'])
 
         result_str = json.dumps(result)
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.RENDER_SKELETON.name, result_str)
