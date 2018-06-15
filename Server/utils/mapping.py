@@ -1,0 +1,22 @@
+KinectBoneMapping = {
+    'Head': ['Neck', 'Head'],
+    'Neck': ['SpineShoulder', 'Neck'],
+    'SpineTop': ['SpineMid', 'SpineShoulder'],
+    'SpineBottom': ['SpineBase', 'SpineMid'],
+    'ClavicleLeft': ['SpineShoulder', 'ShoulderLeft'],
+    'UpperArmLeft': ['ShoulderLeft', 'ElbowLeft'],
+    'ForearmLeft': ['ElbowLeft', 'WristLeft'],
+    'HandLeft': ['WristLeft', 'HandLeft'],
+    'ClavicleRight': ['SpineShoulder', 'ShoulderRight'],
+    'UpperArmRight': ['ShoulderRight', 'ElbowRight'],
+    'ForearmRight': ['ElbowRight', 'WristRight'],
+    'HandRight': ['WristRight', 'HandRight'],
+    'HipLeft': ['SpineBase', 'HipLeft'],
+    'ThighLeft': ['HipLeft', 'KneeLeft'],
+    'ShinLeft': ['KneeLeft', 'AnkleLeft'],
+    'FootLeft': ['AnkleLeft', 'FootLeft'],
+    'HipRight': ['SpineBase', 'HipRight'],
+    'ThighRight': ['HipRight', 'KneeRight'],
+    'ShinRight': ['KneeRight', 'AnkleRight'],
+    'FootRight': ['AnkleRight', 'FootRight']
+}
