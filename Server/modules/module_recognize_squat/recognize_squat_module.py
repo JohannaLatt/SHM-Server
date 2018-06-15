@@ -40,10 +40,12 @@ class RecognizeSquatModule(AbstractMirrorModule):
 
         self.red = (1, 0.2, 0.2, 1)
 
+        self.User.update_user_state(USER_STATE.NONE)
+        self.User.update_exercise_state(SQUAT_STAGE.NONE)
+
     def mirror_started(self):
         super().mirror_started()
-        # do nothing with that
-        pass
+        self.__reset_variables()
 
     def tracking_started(self):
         super().tracking_started()
