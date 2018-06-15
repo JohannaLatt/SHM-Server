@@ -143,7 +143,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
 
     def send_to_mirror(self, id, text, color=(1, 1, 1, 1), stay=10000):
         if id == "squat_text":
-            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
+            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
                 json.dumps({
                  "text": text,
                  "id": id,
@@ -155,7 +155,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                      "fade_out": 1}
                  }))
         elif id == "squat_repetitions":
-            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT .name,
+            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT .name,
                 json.dumps({
                  "text": "Repetitions: {}".format(self.repetitions),
                  "id": id,
