@@ -10,7 +10,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().mirror_started()
         print("[WelcomeModule][info] Mirror is started")
         self.Messaging.send_message(
-            MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({
+            MSG_TO_MIRROR_KEYS.TEXT.name, json.dumps({
                                         "text": "Welcome!",
                                         "position": (0.5, 0.9),
                                         "id": "Welcome",
@@ -24,7 +24,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().tracking_started()
         print("[WelcomeModule][info] Tracking")
         self.Messaging.send_message(
-            MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({
+            MSG_TO_MIRROR_KEYS.TEXT.name, json.dumps({
                                         "text": "I can see you! :-)",
                                         "position": (0.5, 0.9),
                                         "id": "Welcome",
@@ -43,7 +43,7 @@ class WelcomeModule(AbstractMirrorModule):
         super().tracking_lost()
         print("[WelcomeModule][info] Tracking Lost")
         self.Messaging.send_message(
-            MSG_TO_MIRROR_KEYS.STATIC_TEXT.name, json.dumps({
+            MSG_TO_MIRROR_KEYS.TEXT.name, json.dumps({
                                         "text": "I lost you :-(",
                                         "position": (0.5, 0.9),
                                         "id": "Welcome",

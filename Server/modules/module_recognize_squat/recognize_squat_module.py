@@ -116,31 +116,6 @@ class RecognizeSquatModule(AbstractMirrorModule):
             # Save the current distance to the initial spine position
             self.last_distance_in_y = self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]
 
-    def send_to_mirror(self, id, text, color=(1, 1, 1, 1), stay=10000):
-        if id == "squat_text":
-            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
-                json.dumps({
-                 "text": text,
-                 "id": id,
-                 "position": (0.5, 0.8),
-                 "color": color,
-                 "animation": {
-                     "fade_in": 0.3,
-                     "stay": stay,
-                     "fade_out": 1}
-                 }))
-        elif id == "squat_repetitions":
-            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
-                json.dumps({
-                 "text": "Repetitions: {}".format(self.repetitions),
-                 "id": id,
-                 "position": (0.1, 0.1),
-                 "animation": {
-                     "fade_in": 0.5,
-                     "stay": stay,
-                     "fade_out": 1}
-                }))
-
     # Checks if the upper body is straight while the user is not moving
     def is_upper_body_straight(self, spine_shoulder, spine_mid, spine_base):
         if (abs(spine_shoulder["x"] - spine_mid["x"]) < self.threshold_straight_x
@@ -165,3 +140,28 @@ class RecognizeSquatModule(AbstractMirrorModule):
         self.__reset_variables()
         self.send_to_mirror("squat_repetitions", "", 0)
         self.send_to_mirror("squat_text", "", 0)
+
+    def send_to_mirror(self, id, text, color=(1, 1, 1, 1), stay=10000):
+        if id == "squat_text":
+            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
+                json.dumps({
+                 "text": text,
+                 "id": id,
+                 "position": (0.5, 0.8),
+                 "color": color,
+                 "animation": {
+                     "fade_in": 0.3,
+                     "stay": stay,
+                     "fade_out": 1}
+                 }))
+        elif id == "squat_repetitions":
+            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT .name,
+                json.dumps({
+                 "text": "Repetitions: {}".format(self.repetitions),
+                 "id": id,
+                 "position": (0.1, 0.1),
+                 "animation": {
+                     "fade_in": 0.5,
+                     "stay": stay,
+                     "fade_out": 1}
+                }))

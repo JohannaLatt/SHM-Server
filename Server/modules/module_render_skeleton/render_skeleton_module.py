@@ -51,21 +51,6 @@ class RenderSkeletonModule(AbstractMirrorModule):
         # Bones
         result['Bones'] = KinectBoneMapping
 
-        '''drawing_coordinates = []
-        for joint, joint_data in data.items():
-            from_p = joint_data["joint_position"]
-            to_p = data[joint_data["joint_parent"]]["joint_position"]
-
-            # Format for from a to b: [(ax, ay, az), (bx, by, bz)]
-            from_to = []
-            from_to.append((from_p["x"], from_p["y"], from_p["z"]))
-            from_to.append((to_p["x"], to_p["y"], to_p["z"]))
-
-            # Append to result
-            drawing_coordinates.append(from_to)
-
-        result_str = json.dumps(drawing_coordinates)'''
-
         result_str = json.dumps(result)
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.RENDER_SKELETON.name, result_str)
 
