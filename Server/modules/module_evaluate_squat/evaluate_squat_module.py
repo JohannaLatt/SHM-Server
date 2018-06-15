@@ -71,7 +71,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
         return degrees(arccos(clip(dot(v1_u, v2_u), -1.0, 1.0)))
 
     def show_message_at_joint(self, text, joint):
-        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
+        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
             json.dumps({
              "text": text,
              "id": joint,
@@ -84,7 +84,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
             }))
 
     def hide_message_at_joint(self, joint):
-        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.STATIC_TEXT.name,
+        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
             json.dumps({
              "text": "",
              "id": joint,
