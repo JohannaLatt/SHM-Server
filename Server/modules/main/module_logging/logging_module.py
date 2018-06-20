@@ -19,7 +19,7 @@ class LoggingModule(AbstractMirrorModule):
 
         now = datetime.datetime.now()
         filename = "logs/{}_raw_tracking_data.log".format(now.strftime('%Y_%m_%d-%H_%M_%S'))
-        hdlr = RotatingFileHandler(filename, maxBytes=5*1024*1024)  # max 5 MB
+        hdlr = RotatingFileHandler(filename, maxBytes=5*1024*1024, backupCount=1)  # max 5 MB
 
         formatter = logging.Formatter('%(message)s')
         hdlr.setFormatter(formatter)
