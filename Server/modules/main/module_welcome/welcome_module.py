@@ -34,11 +34,6 @@ class WelcomeModule(AbstractMirrorModule):
                                             "fade_out": 0.5}
                                         }))
 
-    def tracking_data(self, data):
-        super().tracking_data(data)
-        # do nothing with that
-        pass
-
     def tracking_lost(self):
         super().tracking_lost()
         print("[WelcomeModule][info] Tracking Lost")

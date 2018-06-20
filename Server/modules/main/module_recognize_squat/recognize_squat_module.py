@@ -135,8 +135,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
     def tracking_lost(self):
         super().tracking_lost()
         self.__reset_variables()
-        self.send_to_mirror("squat_repetitions", "", 0)
-        self.send_to_mirror("squat_text", "", 0)
+        self.send_to_mirror("squat_repetitions", "", stay=0)
+        self.send_to_mirror("squat_text", "", stay=0)
 
     def send_to_mirror(self, id, text, color=(1, 1, 1, 1), stay=10000):
         if id == "squat_text":
