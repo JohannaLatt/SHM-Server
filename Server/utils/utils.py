@@ -1,47 +1,42 @@
-import json
-from collections import namedtuple
+from numpy import (dot, arccos, linalg, clip, degrees)
 
 
-def _json_object_hook(d): return namedtuple('X', d.keys())(*d.values())
+# Math
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / linalg.norm(vector)
 
 
-# Turns json-data into a python object
-def json2obj(data): return json.loads(data, object_hook=_json_object_hook)
+def angle_between(v1, v2):
+    """ Returns the angle in degrees between vectors 'v1' and 'v2' """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return degrees(arccos(clip(dot(v1_u, v2_u), -1.0, 1.0)))
 
 
-class LimitedList(list):
+# Colors
+def lerp_hsv(color_a, color_b, t):
+    # Hue interpolation
+    d = color_b[0] - color_a[0]
 
-    # Read-only
-    @property
-    def maxLen(self):
-        return self._maxLen
+    if color_a[0] > color_b[0]:
+        # Swap (a.h, b.h)
+        h3 = color_b[0]
+        color_b[0] = color_b[0]
+        color_a[0] = h3
 
-    def __init__(self, *args, **kwargs):
-        self._maxLen = kwargs.pop("maxLen")
-        list.__init__(self, *args, **kwargs)
+        d = -d;
+        t = 1 - t;
 
-    def _truncate(self):
-        """Called by various methods to reinforce the maximum length."""
-        dif = len(self)-self._maxLen
-        if dif > 0:
-            self[:dif]=[]
+    if d > 0.5:  # 180deg
+        color_a[0] = color_a[0] + 1  # 360deg
+        h = (color_a[0] + t * (color_b[0] - color_a[0]) ) % 1 # 360deg
 
-    def append(self, x):
-        list.append(self, x)
-        self._truncate()
+    if d <= 0.5:  # 180deg
+        h = color_a[0] + t * d
 
-    def insert(self, *args):
-        list.insert(self, *args)
-        self._truncate()
-
-    def extend(self, x):
-        list.extend(self, x)
-        self._truncate()
-
-    def __setitem__(self, *args):
-        list.__setitem__(self, *args)
-        self._truncate()
-
-    def __setslice__(self, *args):
-        list.__setslice__(self, *args)
-        self._truncate()
+    return(h,
+            color_a[1] + t * (color_b[1]-color_a[1]),  # S
+            color_a[2] + t * (color_b[2]-color_a[2]),  # V
+            color_a[3] + t * (color_b[3]-color_a[3])   # A
+            )
