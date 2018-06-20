@@ -6,4 +6,3 @@ Server.egg-info/top_level.txt
 server/__init__.py
 server/messaging.py
 server/module_manager.py
-server/views.py
