@@ -47,19 +47,14 @@ class RecognizeSquatModule(AbstractMirrorModule):
         super().mirror_started()
         self.__reset_variables()
 
-    def tracking_started(self):
-        super().tracking_started()
-        pass
-
-    def tracking_data(self, data):
-        super().tracking_data(data)
-
-        data = json.loads(data)["joint_data"]
+    def user_updated(self, user):
+        super().user_updated(user)
 
         # Get the relevant joints
-        spine_shoulder = data[KINECT_JOINTS.SpineShoulder.name]["joint_position"]
-        spine_base = data[KINECT_JOINTS.SpineBase.name]["joint_position"]
-        spine_mid = data[KINECT_JOINTS.SpineMid.name]["joint_position"]
+        joints = user.get_joints()
+        spine_shoulder = joints[KINECT_JOINTS.SpineShoulder.name]
+        spine_base = joints[KINECT_JOINTS.SpineBase.name]
+        spine_mid = joints[KINECT_JOINTS.SpineMid.name]
 
         # Check if READY FOR SQUAT
         if self.is_upper_body_straight(spine_shoulder, spine_mid, spine_base) and not self.standing_straight:
@@ -70,8 +65,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
         if self.standing_straight:
             # Check for walking away
             if (self.squatting and
-            (abs(self.starting_spine_base_pos["x"] - spine_base["x"]) > self.threshold_in_place_x or
-            abs(self.starting_spine_base_pos["z"] - spine_base["z"]) > self.threshold_in_place_z)):
+            (abs(self.starting_spine_base_pos[0] - spine_base[0]) > self.threshold_in_place_x or
+            abs(self.starting_spine_base_pos[2] - spine_base[2]) > self.threshold_in_place_z)):
                 self.repetitions = 0
                 self.squatting = False
                 self.standing_straight = False
@@ -84,7 +79,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
             # Check for straight back
             elif self.is_upper_body_straight_during_squat(spine_shoulder, spine_mid, spine_base):
                 # Moving down -> SQUAT STARTED
-                if (self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]) > self.threshold_movement_in_y:
+                if (self.starting_spine_shoulder_pos[1] - spine_shoulder[1]) > self.threshold_movement_in_y:
                     self.squatting = True
                     self.just_finished_squat = False
                     self.send_to_mirror("squat_text", "You are doing squats - keep on going!")
@@ -92,14 +87,14 @@ class RecognizeSquatModule(AbstractMirrorModule):
 
                 # Determine squat direction
                 if self.squatting:
-                    current_distance_in_y = self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]
+                    current_distance_in_y = self.starting_spine_shoulder_pos[1] - spine_shoulder[1]
                     if (self.last_distance_in_y < current_distance_in_y):
                         self.User.update_exercise_state(SQUAT_STAGE.GOING_DOWN)
                     else:
                         self.User.update_exercise_state(SQUAT_STAGE.GOING_UP)
 
                 # After moving down, moved back up -> SQUAT COMPLETE
-                if not self.just_finished_squat and self.squatting and abs(self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]) < self.threshold_equal_y_pos:
+                if not self.just_finished_squat and self.squatting and abs(self.starting_spine_shoulder_pos[1] - spine_shoulder[1]) < self.threshold_equal_y_pos:
                     self.just_finished_squat = True
                     self.repetitions += 1
                     self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
@@ -116,14 +111,14 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 self.User.update_exercise_state(SQUAT_STAGE.NONE)
 
             # Save the current distance to the initial spine position
-            self.last_distance_in_y = self.starting_spine_shoulder_pos["y"] - spine_shoulder["y"]
+            self.last_distance_in_y = self.starting_spine_shoulder_pos[1] - spine_shoulder[1]
 
     # Checks if the upper body is straight while the user is not moving
     def is_upper_body_straight(self, spine_shoulder, spine_mid, spine_base):
-        if (abs(spine_shoulder["x"] - spine_mid["x"]) < self.threshold_straight_x
-        and abs(spine_mid["x"] - spine_base["x"]) < self.threshold_straight_x
-        and abs(spine_shoulder["z"] - spine_mid["z"]) < self.threshold_straight_z
-        and abs(spine_mid["z"] - spine_base["z"]) < self.threshold_straight_z):
+        if (abs(spine_shoulder[0] - spine_mid[0]) < self.threshold_straight_x
+        and abs(spine_mid[0] - spine_base[0]) < self.threshold_straight_x
+        and abs(spine_shoulder[2] - spine_mid[2]) < self.threshold_straight_z
+        and abs(spine_mid[2] - spine_base[2]) < self.threshold_straight_z):
             return True
         return False
 
@@ -132,8 +127,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
     # to be used DURING a movement (so there is some natural shacking). It also
     # only checks x since z should actually move during a squat.
     def is_upper_body_straight_during_squat(self, spine_shoulder, spine_mid, spine_base):
-        if (abs(spine_shoulder["x"] - spine_mid["x"]) < self.threshold_straight_squatting_x
-        and abs(spine_mid["x"] - spine_base["x"]) < self.threshold_straight_squatting_x):
+        if (abs(spine_shoulder[0] - spine_mid[0]) < self.threshold_straight_squatting_x
+        and abs(spine_mid[0] - spine_base[0]) < self.threshold_straight_squatting_x):
             return True
         return False
 

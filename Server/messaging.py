@@ -1,5 +1,6 @@
 from Server.utils.enums import MSG_FROM_MIRROR_KEYS
 from Server.utils.enums import MSG_FROM_KINECT_KEYS
+from Server.utils.enums import MSG_FROM_INTERNAL
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
 
 from amqpstorm import Connection
@@ -18,7 +19,8 @@ class MirrorMessage:
 class Messaging:
 
     def __init__(self):
-        self.mirror_msg_queue = queue.Queue()
+        # Queue to save all incoming messages
+        self.message_queue = queue.Queue()
 
         # Create a messaging connection
         Config = configparser.ConfigParser()
@@ -36,20 +38,23 @@ class Messaging:
     # Callback for consuming incoming messages from the Mirror
     def consume_mirror_message(self, message):
         if message.method['routing_key'] == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
-            self.mirror_msg_queue.put(MirrorMessage(MSG_FROM_MIRROR_KEYS.MIRROR_READY.name, ''))
+            self.message_queue.put(MirrorMessage(MSG_FROM_MIRROR_KEYS.MIRROR_READY.name, ''))
         else:
             print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
     # Callback for consuming incoming messages from the Kinect
     def consume_kinect_message(self, message):
         if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
-            self.mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name, ''))
+            self.message_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name, ''))
         elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_DATA.name:
-            self.mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_DATA.name, message.body))
+            self.message_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_DATA.name, message.body))
         elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
-            self.mirror_msg_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_LOST.name, ''))
+            self.message_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_LOST.name, ''))
         else:
             print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
+
+    def consume_internal_message(self, key):
+        self.message_queue.put(MirrorMessage(key, ''))
 
     def _initiate_messaging_to_mirror(self):
         # Save the queue

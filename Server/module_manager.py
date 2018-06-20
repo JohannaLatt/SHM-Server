@@ -43,7 +43,7 @@ class ModuleManager():
 
     def run(self):
         while True:
-            item = self.messaging.mirror_msg_queue.get()
+            item = self.messaging.message_queue.get()
 
             if item is None:
                 continue
@@ -51,4 +51,4 @@ class ModuleManager():
             for module_queue in self.__module_queues:
                 module_queue.put(item)
 
-            self.messaging.mirror_msg_queue.task_done()
+            self.messaging.message_queue.task_done()

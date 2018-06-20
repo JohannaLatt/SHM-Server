@@ -14,6 +14,10 @@ class MSG_FROM_KINECT_KEYS(Enum):
     TRACKING_LOST = 3
 
 
+class MSG_FROM_INTERNAL(Enum):
+    USER_UPDATED = 1
+
+
 class MSG_TO_MIRROR_KEYS(Enum):
     TEXT = 1
     RENDER_SKELETON = 2

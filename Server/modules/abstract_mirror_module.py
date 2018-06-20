@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from Server.utils.enums import MSG_FROM_MIRROR_KEYS
 from Server.utils.enums import MSG_FROM_KINECT_KEYS
+from Server.utils.enums import MSG_FROM_INTERNAL
 
 
 class AbstractMirrorModule(ABC):
@@ -12,20 +13,24 @@ class AbstractMirrorModule(ABC):
         self.__queue = queue
         self.User = User
 
-    @abstractmethod
     def mirror_started(self):
+        # By default, do nothing with it
         pass
 
-    @abstractmethod
     def tracking_started(self):
+        # By default, do nothing with it
         pass
 
-    @abstractmethod
     def tracking_data(self, data):
+        # By default, do nothing with it
         pass
 
-    @abstractmethod
     def tracking_lost(self):
+        # By default, do nothing with it
+        pass
+
+    def user_updated(self, user):
+        # By default, do nothing with it
         pass
 
     def run(self):
@@ -43,5 +48,7 @@ class AbstractMirrorModule(ABC):
                 self.tracking_data(item.body)
             elif item.key == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
                 self.tracking_lost()
+            elif item.key == MSG_FROM_INTERNAL.USER_UPDATED.name:
+                self.user_updated(self.User)
 
             self.__queue.task_done()

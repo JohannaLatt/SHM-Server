@@ -18,25 +18,15 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.color_wrong = (0, .7, 1, .7)       # red
         self.color_correct = (.33, .7, 1, .7)   # green
 
-    def mirror_started(self):
-        super().mirror_started()
-        # do nothing with that
-        pass
-
-    def tracking_started(self):
-        super().tracking_started()
-        # do nothing with that
-        pass
-
-    def tracking_data(self, data):
-        super().tracking_data(data)
+    def user_updated(self, user):
+        super().user_updated(user)
 
         # Check if the user is currently doing a squat
-        if self.User.get_user_state() is USER_STATE.SQUATTING:
+        if user.get_user_state() is USER_STATE.SQUATTING:
             self.evaluating = True
 
-            self.joints = self.User.get_joints()
-            self.bones = self.User.get_bones()
+            self.joints = user.get_joints()
+            self.bones = user.get_bones()
 
             if len(self.joints) == 0 or len(self.bones) == 0:
                 pass   # Data not ready yet
