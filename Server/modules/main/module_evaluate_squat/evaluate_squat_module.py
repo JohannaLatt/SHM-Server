@@ -19,8 +19,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.color_wrong = (0, .7, 1, .7)       # red
         self.color_correct = (.33, .7, 1, .7)   # green
 
-    def user_updated(self, user):
-        super().user_updated(user)
+    def user_exercising_updated(self, user):
+        super().user_exercising_updated(user)
 
         # Check if the user is currently doing a squat
         if user.get_user_state() is USER_STATE.SQUATTING:
@@ -59,6 +59,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
             self.reset_skeleton_color()
 
     def tracking_lost(self):
+        # print("[EvaluateSquatModule][info] Cleaning up")
         super().tracking_lost()
         self.clean_UI()
         self.reset_skeleton_color()

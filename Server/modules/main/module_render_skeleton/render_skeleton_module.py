@@ -8,8 +8,8 @@ class RenderSkeletonModule(AbstractMirrorModule):
     ''' Processing Module (ie uses preprocessed internal data) '''
     ''' Takes the preprocessed data and sends it to the mirror for rendering '''
 
-    def user_updated(self, user):
-        super().user_updated(user)
+    def user_skeleton_updated(self, user):
+        super().user_skeleton_updated(user)
 
         # Send the user data to the mirror
         result = {'Joints': user.get_joints(), 'Bones': user.get_bones()}

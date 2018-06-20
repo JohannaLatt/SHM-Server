@@ -29,7 +29,11 @@ class AbstractMirrorModule(ABC):
         # By default, do nothing with it
         pass
 
-    def user_updated(self, user):
+    def user_skeleton_updated(self, user):
+        # By default, do nothing with it
+        pass
+
+    def user_exercising_updated(self, user):
         # By default, do nothing with it
         pass
 
@@ -48,7 +52,9 @@ class AbstractMirrorModule(ABC):
                 self.tracking_data(item.body)
             elif item.key == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
                 self.tracking_lost()
-            elif item.key == MSG_FROM_INTERNAL.USER_UPDATED.name:
-                self.user_updated(self.User)
+            elif item.key == MSG_FROM_INTERNAL.USER_SKELETON_UPDATED.name:
+                self.user_skeleton_updated(self.User)
+            elif item.key == MSG_FROM_INTERNAL.USER_EXERCISING_UPDATED.name:
+                self.user_exercising_updated(self.User)
 
             self.__queue.task_done()

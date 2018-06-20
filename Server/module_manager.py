@@ -14,7 +14,7 @@ class ModuleManager():
         self.messaging = Messaging
 
         # Saves the user data during a workout
-        self.User = User()
+        self.User = User(self.messaging)
 
         Config = configparser.ConfigParser()
         Config.read('./config/mirror_config.ini')

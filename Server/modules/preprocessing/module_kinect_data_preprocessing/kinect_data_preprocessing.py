@@ -44,14 +44,11 @@ class KinectDataPreprocessing(AbstractMirrorModule):
         joints = {}
         for joint, joint_data in data.items():
             joints[joint] = [
-                                        joint_data["joint_position"]['x'],
-                                        joint_data["joint_position"]['y'],
-                                        joint_data["joint_position"]['z']
-                                       ]
+                            joint_data["joint_position"]['x'],
+                            joint_data["joint_position"]['y'],
+                            joint_data["joint_position"]['z']
+                            ]
         self.User.update_joints(joints)
-
-        # Notify modules that the user has been updated
-        self.Messaging.consume_internal_message(MSG_FROM_INTERNAL.USER_UPDATED.name)
 
     def tracking_lost(self):
         super().tracking_lost()

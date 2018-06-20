@@ -1,3 +1,5 @@
+from Server.utils.enums import MSG_FROM_INTERNAL
+
 from enum import Enum
 from Server.utils.read_write_lock import ReadWriteLock
 
@@ -15,7 +17,9 @@ class SQUAT_STAGE(Enum):
 
 class User():
 
-    def __init__(self):
+    def __init__(self, Messaging):
+        self.Messaging = Messaging
+
         self.state = USER_STATE.NONE
         self.exercise_stage = SQUAT_STAGE.NONE
         self.bones = {}
@@ -24,25 +28,26 @@ class User():
         # Obtain a lock that has to be used to change the user
         self.lock = ReadWriteLock()
 
-    def update_user_state(self, state):
+    def update_user_state_and_stage(self, state, exercise_stage):
         self.lock.acquire_write()
         self.state = state
-        self.lock.release_write()
-
-    def update_exercise_state(self, exercise_stage):
-        self.lock.acquire_write()
         self.exercise_stage = exercise_stage
         self.lock.release_write()
+        self.Messaging.consume_internal_message(
+            MSG_FROM_INTERNAL.USER_EXERCISING_UPDATED.name)
 
     def update_bones(self, bones):
         self.lock.acquire_write()
         self.bones = bones
         self.lock.release_write()
+        # No need to notify the modules since this only happens once
 
     def update_joints(self, joints):
         self.lock.acquire_write()
         self.joints = joints
         self.lock.release_write()
+        self.Messaging.consume_internal_message(
+            MSG_FROM_INTERNAL.USER_SKELETON_UPDATED.name)
 
     def get_user_state(self):
         self.lock.acquire_read()

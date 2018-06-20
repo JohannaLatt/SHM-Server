@@ -40,15 +40,14 @@ class RecognizeSquatModule(AbstractMirrorModule):
 
         self.red = (1, 0.2, 0.2, 1)
 
-        self.User.update_user_state(USER_STATE.NONE)
-        self.User.update_exercise_state(SQUAT_STAGE.NONE)
+        self.User.update_user_state_and_stage(USER_STATE.NONE, SQUAT_STAGE.NONE)
 
     def mirror_started(self):
         super().mirror_started()
         self.__reset_variables()
 
-    def user_updated(self, user):
-        super().user_updated(user)
+    def user_skeleton_updated(self, user):
+        super().user_skeleton_updated(user)
 
         # Get the relevant joints
         joints = user.get_joints()
@@ -73,8 +72,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions), stay=1)
                 self.send_to_mirror("squat_text", "Squat failed, you walked - resetting", self.red, stay=1)
 
-                self.User.update_user_state(USER_STATE.NONE)
-                self.User.update_exercise_state(SQUAT_STAGE.NONE)
+                self.User.update_user_state_and_stage(USER_STATE.NONE, SQUAT_STAGE.NONE)
 
             # Check for straight back
             elif self.is_upper_body_straight_during_squat(spine_shoulder, spine_mid, spine_base):
@@ -83,15 +81,15 @@ class RecognizeSquatModule(AbstractMirrorModule):
                     self.squatting = True
                     self.just_finished_squat = False
                     self.send_to_mirror("squat_text", "You are doing squats - keep on going!")
-                    self.User.update_user_state(USER_STATE.SQUATTING)
+                    self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.NONE)
 
                 # Determine squat direction
                 if self.squatting:
                     current_distance_in_y = self.starting_spine_shoulder_pos[1] - spine_shoulder[1]
                     if (self.last_distance_in_y < current_distance_in_y):
-                        self.User.update_exercise_state(SQUAT_STAGE.GOING_DOWN)
+                        self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.GOING_DOWN)
                     else:
-                        self.User.update_exercise_state(SQUAT_STAGE.GOING_UP)
+                        self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.GOING_UP)
 
                 # After moving down, moved back up -> SQUAT COMPLETE
                 if not self.just_finished_squat and self.squatting and abs(self.starting_spine_shoulder_pos[1] - spine_shoulder[1]) < self.threshold_equal_y_pos:
@@ -107,8 +105,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 self.send_to_mirror("squat_text", "Squat failed, your back has to be straight - resetting", self.red, stay=1)
                 self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions), stay=1)
 
-                self.User.update_user_state(USER_STATE.NONE)
-                self.User.update_exercise_state(SQUAT_STAGE.NONE)
+                self.User.update_user_state_and_stage(USER_STATE.NONE, SQUAT_STAGE.NONE)
 
             # Save the current distance to the initial spine position
             self.last_distance_in_y = self.starting_spine_shoulder_pos[1] - spine_shoulder[1]
@@ -133,6 +130,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
         return False
 
     def tracking_lost(self):
+        # print("[RecognizeSquatModule][info] Cleaning up")
         super().tracking_lost()
         self.__reset_variables()
         self.send_to_mirror("squat_repetitions", "", stay=0)
