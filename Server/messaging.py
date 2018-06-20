@@ -1,6 +1,5 @@
 from Server.utils.enums import MSG_FROM_MIRROR_KEYS
 from Server.utils.enums import MSG_FROM_KINECT_KEYS
-from Server.utils.enums import MSG_FROM_INTERNAL
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
 
 from amqpstorm import Connection

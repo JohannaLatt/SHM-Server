@@ -3,7 +3,7 @@ import importlib
 import threading
 import queue
 
-from Server.utils.user import User
+from Server.user import User
 
 
 # Instantiate all modules from the config
