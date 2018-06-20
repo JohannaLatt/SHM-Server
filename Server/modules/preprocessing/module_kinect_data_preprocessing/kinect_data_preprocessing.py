@@ -38,17 +38,15 @@ class KinectDataPreprocessing(AbstractMirrorModule):
         super().tracking_data(data)
 
         # Load string as json
-        data = json.loads(data)["joint_data"]
+        data = json.loads(data)
 
-        # Reformat the joint data
-        joints = {}
-        for joint, joint_data in data.items():
-            joints[joint] = [
-                            joint_data["joint_position"]['x'],
-                            joint_data["joint_position"]['y'],
-                            joint_data["joint_position"]['z']
-                            ]
-        self.User.update_joints(joints)
+        # Save the data to the user
+        # (since this project was build for and with the Kinect, no further
+        # data processing is necessary. Other tracking systems might send the
+        # data in a different format or have more or less joints than the
+        # Kinect-reference-joint structure and would require actual pre
+        # processing at this point)
+        self.User.update_joints(data)
 
     def tracking_lost(self):
         super().tracking_lost()

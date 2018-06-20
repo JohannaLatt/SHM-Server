@@ -4,6 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import datetime
 import os
+import json
 
 max_number_of_log_files = 20
 
@@ -28,7 +29,7 @@ class LoggingModule(AbstractMirrorModule):
 
     def user_skeleton_updated(self, user):
         super().user_skeleton_updated(user)
-        self.raw_tracking_data_logger.error(user.get_joints())
+        self.raw_tracking_data_logger.error(json.dumps(user.get_joints()))
 
     def delete_old_log_files(self):
         files = os.listdir('logs/')
