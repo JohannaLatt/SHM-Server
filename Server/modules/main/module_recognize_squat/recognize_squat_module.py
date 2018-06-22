@@ -142,7 +142,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 json.dumps({
                  "text": text,
                  "id": id,
-                 "position": (0.5, 0.95),
+                 "position": {"x": 0.5, "y": 0.95},
                  "color": color,
                  "animation": {
                      "fade_in": 0.3,
@@ -155,7 +155,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                  "text": "Repetitions: {}".format(self.repetitions),
                  "id": id,
                  "font_size": 30,
-                 "position": (0.1, 0.05),
+                 "position": {"right": 0.1, "top": 0.05},
                  "animation": {
                      "fade_in": 0.5,
                      "stay": stay,

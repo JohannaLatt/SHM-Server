@@ -12,7 +12,7 @@ class WelcomeModule(AbstractMirrorModule):
         self.Messaging.send_message(
             MSG_TO_MIRROR_KEYS.TEXT.name, json.dumps({
                                         "text": "Welcome!",
-                                        "position": (0.5, 0.6),
+                                        "position": {"x": 0.5, "y": 0.6},
                                         "font_size": 47,
                                         "id": "Welcome",
                                         "animation": {
@@ -27,7 +27,7 @@ class WelcomeModule(AbstractMirrorModule):
         self.Messaging.send_message(
             MSG_TO_MIRROR_KEYS.TEXT.name, json.dumps({
                                         "text": "I can see you! :-)",
-                                        "position": (0.5, 0.9),
+                                        "position": {"x": 0.5, "y": 0.9},
                                         "id": "Welcome",
                                         "animation": {
                                             "fade_in": 0.5,
@@ -41,7 +41,7 @@ class WelcomeModule(AbstractMirrorModule):
         self.Messaging.send_message(
             MSG_TO_MIRROR_KEYS.TEXT.name, json.dumps({
                                         "text": "I lost you :-(",
-                                        "position": (0.5, 0.9),
+                                        "position": {"x": 0.5, "y": 0.9},
                                         "id": "Welcome",
                                         "animation": {
                                             "fade_in": 0.5,
