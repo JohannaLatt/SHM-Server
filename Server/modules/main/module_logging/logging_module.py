@@ -39,7 +39,6 @@ class LoggingModule(AbstractMirrorModule):
 
         if len(files) > (max_number_of_log_files - 1):
             files.sort()   # Oldest will be first
-            print("range is 0 to {}".format(len(files) - max_number_of_log_files + 1))
             for i in range(0, (len(files) - max_number_of_log_files + 1)):
                 f = os.path.join('logs/', files[i])
                 os.remove(f)
