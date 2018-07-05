@@ -47,8 +47,3 @@ class KinectDataPreprocessing(AbstractMirrorModule):
         # Kinect-reference-joint structure and would require actual pre
         # processing at this point)
         self.User.update_joints(data)
-
-    def tracking_lost(self):
-        super().tracking_lost()
-        print('[KinectDataPreprocessing][info] Tracking lost')
-        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.CLEAR_SKELETON.name, '')
