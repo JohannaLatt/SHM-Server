@@ -1,4 +1,5 @@
 from numpy import (dot, arccos, linalg, clip, degrees)
+import numpy as np
 
 
 # Math
@@ -13,6 +14,17 @@ def angle_between(v1, v2):
     v2_u = unit_vector(v2)
     return degrees(arccos(clip(dot(v1_u, v2_u), -1.0, 1.0)))
 
+
+# Skeleton-specific utils
+def get_vector_of_bone(joints, bones, bone):
+    return (joints[bones[bone][0]][0] - joints[bones[bone][1]][0], # x
+            joints[bones[bone][0]][1] - joints[bones[bone][1]][1]) # y
+
+def get_angle_between_bones(joints, bones, bone_a, bone_b):
+    vector_a = get_vector_of_bone(joints, bones, bone_a)
+    vector_b = get_vector_of_bone(joints, bones,bone_b)
+    angle = np.around(angle_between(vector_a, vector_b), decimals=1)
+    return angle
 
 # Colors
 def lerp_hsv(color_a, color_b, t):

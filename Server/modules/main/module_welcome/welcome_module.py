@@ -12,8 +12,9 @@ class WelcomeModule(AbstractMirrorModule):
         self.Messaging.send_message(
             MSG_TO_MIRROR_KEYS.TEXT.name, json.dumps({
                                         "text": "Welcome!",
-                                        "position": {"x": 0.5, "y": 0.6},
+                                        "position": {"x": 0, "y": 0},
                                         "font_size": 47,
+                                        "halign": "center",
                                         "id": "Welcome",
                                         "animation": {
                                             "fade_in": 1,

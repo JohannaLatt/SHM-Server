@@ -1,9 +1,9 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
 
-from Server.user import USER_STATE
+from Server.user import USER_STATE, SQUAT_STAGE
 
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
-from Server.utils.utils import angle_between, lerp_hsv
+from Server.utils.utils import angle_between, lerp_hsv, get_angle_between_bones
 
 import json
 import numpy as np
@@ -33,14 +33,10 @@ class EvaluateSquatModule(AbstractMirrorModule):
                 pass   # Data not ready yet
 
             # Calculate the angle between the thigh and shin
-            left_thigh_vector = self.get_vector_of_bone("ThighRight")
-            left_shin_vector = self.get_vector_of_bone("ShinRight")
-            left_knee_angle = np.around(angle_between(left_thigh_vector, left_shin_vector), decimals=1)
+            left_knee_angle = get_angle_between_bones(self.joints, self.bones, "ThighRight", "ShinRight")
             self.show_message_at_joint(left_knee_angle, "KneeRight")
 
-            right_thigh_vector = self.get_vector_of_bone("ThighLeft")
-            right_shin_vector = self.get_vector_of_bone("ShinLeft")
-            right_knee_angle = np.around(angle_between(right_thigh_vector, right_shin_vector), decimals=1)
+            right_knee_angle = get_angle_between_bones(self.joints, self.bones, "ThighLeft", "ShinLeft")
             self.show_message_at_joint(right_knee_angle, "KneeLeft")
 
             # Show colored feedback
@@ -59,7 +55,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
             self.reset_skeleton_color()
 
     def tracking_lost(self):
-        # print("[EvaluateSquatModule][info] Cleaning up")
+        print("[EvaluateSquatModule][info] Cleaning up")
         super().tracking_lost()
         self.clean_UI()
         self.reset_skeleton_color()
@@ -91,10 +87,6 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         # Calculate the interpolated color
         return lerp_hsv(self.color_wrong, self.color_correct, t)
-
-    def get_vector_of_bone(self, bone):
-        return (self.joints[self.bones[bone][0]][0] - self.joints[self.bones[bone][1]][0], # x
-                self.joints[self.bones[bone][0]][1] - self.joints[self.bones[bone][1]][1]) # y
 
     def show_message_at_joint(self, text, joint):
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
