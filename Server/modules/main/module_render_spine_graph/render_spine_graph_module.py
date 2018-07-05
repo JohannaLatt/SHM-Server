@@ -27,3 +27,8 @@ class RenderSpineGraphModule(AbstractMirrorModule):
         elif self.graphs_shown:
             self.Messaging.send_message(MSG_TO_MIRROR_KEYS.UPDATE_GRAPHS.name, json.dumps([]))
             self.graphs_shown = False
+
+    def tracking_lost(self):
+        super().tracking_lost()
+        self.Messaging.send_message(MSG_TO_MIRROR_KEYS.UPDATE_GRAPHS.name, json.dumps([]))
+        self.graphs_shown = False
