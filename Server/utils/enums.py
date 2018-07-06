@@ -53,3 +53,25 @@ class KINECT_JOINTS(Enum):
     ThumbLeft = 23
     HandTipRight = 24
     ThumbRight = 25
+
+class KINECT_BONES(Enum):
+    Head = 0
+    Neck = 1
+    SpineTop = 2
+    SpineBottom = 3
+    ClavicleLeft = 4
+    UpperArmLeft = 5
+    ForearmLeft = 6
+    HandLeft = 7
+    ClavicleRight = 8
+    UpperArmRight = 9
+    ForearmRight = 10
+    HandRight = 11
+    HipLeft = 12
+    ThighLeft = 13
+    ShinLeft = 14
+    FootLeft = 15
+    HipRight = 16
+    ThighRight = 17
+    ShinRight = 18
+    FootRight = 19

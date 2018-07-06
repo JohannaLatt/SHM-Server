@@ -1,5 +1,5 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
-from Server.utils.enums import KINECT_JOINTS
+from Server.utils.enums import KINECT_JOINTS, KINECT_BONES
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
 
 from Server.user import USER_STATE
@@ -141,8 +141,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 and std_spine_shoulder_movement[2] < self.max_std_z)
 
     def knees_are_straight(self):
-        right_knee_angle = get_angle_between_bones(self.joints, self.bones, "ThighRight", "ShinRight")
-        left_knee_angle = get_angle_between_bones(self.joints, self.bones, "ThighLeft", "ShinLeft")
+        right_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighRight, KINECT_BONES.ShinRight)
+        left_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighLeft, KINECT_BONES.ShinLeft)
 
         return  right_knee_angle < 10 and left_knee_angle < 10
 
