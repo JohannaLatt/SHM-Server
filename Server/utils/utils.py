@@ -18,11 +18,12 @@ def angle_between(v1, v2):
 # Skeleton-specific utils
 def get_vector_of_bone(joints, bones, bone):
     return (joints[bones[bone][0].name][0] - joints[bones[bone][1].name][0], # x
-            joints[bones[bone][0].name][1] - joints[bones[bone][1].name][1]) # y
+            joints[bones[bone][0].name][1] - joints[bones[bone][1].name][1], # y
+            joints[bones[bone][0].name][2] - joints[bones[bone][1].name][2]) # z
 
 def get_angle_between_bones(joints, bones, bone_a, bone_b):
     vector_a = get_vector_of_bone(joints, bones, bone_a)
-    vector_b = get_vector_of_bone(joints, bones,bone_b)
+    vector_b = get_vector_of_bone(joints, bones, bone_b)
     angle = np.around(angle_between(vector_a, vector_b), decimals=1)
     return angle
 
