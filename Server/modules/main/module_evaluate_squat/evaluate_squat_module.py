@@ -28,7 +28,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.color_correct = (.33, .7, 1, .7)   # green
 
         # Shoulder data
-        self.text_id_shoulder = "shoulder_evaluation"
+        self.text_id_shoulder_1 = "shoulder_evaluation_1"
+        self.text_id_shoulder_2 = "shoulder_evaluation_2"
         self.shoulder_left_angle_over_time = deque(maxlen=self.timeseries_length)
         self.shoulder_right_angle_over_time = deque(maxlen=self.timeseries_length)
         self.shoulder_left_warning = False
@@ -101,7 +102,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.hide_message_at_joint(KINECT_JOINTS.KneeLeft.name)
         self.hide_message_at_joint(KINECT_JOINTS.ShoulderLeft.name)
         self.hide_message_at_joint(KINECT_JOINTS.ShoulderRight.name)
-        self.Messaging.hide_text_message(self.text_id_shoulder)
+        self.Messaging.hide_text_message(self.text_id_shoulder_1)
+        self.Messaging.hide_text_message(self.text_id_shoulder_2)
         self.Messaging.hide_text_message(self.text_id_knees)
         self.Messaging.hide_text_message(self.text_id_knees_min_1)
         self.Messaging.hide_text_message(self.text_id_knees_min_2)
@@ -221,7 +223,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
                 self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleLeft.name, self.color_wrong)
                 self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderLeft.name, self.color_wrong)
 
-                self.Messaging.send_text_to_mirror("Make sure to push your shoulders back, right now they are rounded!", self.text_id_shoulder, position={"x":0, "y":0.35}, stay=3)
+                self.Messaging.send_text_to_mirror("Make sure to push your shoulders back,", self.text_id_shoulder_1, position={"x":-0.02, "y":0.41}, stay=3, halign="right")
+                self.Messaging.send_text_to_mirror("right now they are rounded!", self.text_id_shoulder_2, position={"x":-0.02, "y":0.35}, stay=3, halign="right")
         else:
             left_shoulder_okay = True
 
@@ -236,7 +239,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
                 self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleRight.name, self.color_wrong)
                 self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderRight.name, self.color_wrong)
 
-                self.Messaging.send_text_to_mirror("Make sure to push your shoulders back, right now they are rounded!", self.text_id_shoulder, position={"x":0, "y":0.35}, stay=3)
+                self.Messaging.send_text_to_mirror("Make sure to push your shoulders back,", self.text_id_shoulder_1, position={"x":-0.02, "y":0.41}, stay=3, halign="right")
+                self.Messaging.send_text_to_mirror("right now they are rounded!", self.text_id_shoulder_2, position={"x":-0.02, "y":0.35}, stay=3, halign="right")
         else:
             right_shoulder_okay = True
 
