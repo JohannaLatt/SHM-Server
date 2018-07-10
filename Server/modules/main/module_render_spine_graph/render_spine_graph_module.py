@@ -3,6 +3,7 @@ from Server.utils.enums import MSG_TO_MIRROR_KEYS, KINECT_JOINTS
 from Server.user import USER_STATE
 
 import json
+import configparser
 
 
 class RenderSpineGraphModule(AbstractMirrorModule):
@@ -14,13 +15,19 @@ class RenderSpineGraphModule(AbstractMirrorModule):
         super().__init__(Messaging, queue, User)
         self.graphs_shown = False
 
+        # Config
+        Config = configparser.ConfigParser()
+        Config.read('././config/mirror_config.ini')
+
+        self.joint_for_graph = Config.get('RenderSpineGraphModule', 'joint_for_graph', fallback='SpineBase')
+
     def user_skeleton_updated(self, user):
         super().user_skeleton_updated(user)
 
         if user.get_user_state() is USER_STATE.SQUATTING:
             # Send the spine data to the mirror
             joints = user.get_joints()
-            spine_base = joints[KINECT_JOINTS.SpineBase.name]
+            spine_base = joints[self.joint_for_graph]
 
             self.Messaging.send_message(MSG_TO_MIRROR_KEYS.UPDATE_GRAPHS.name, json.dumps(spine_base))
             self.graphs_shown = True
