@@ -6,6 +6,7 @@ from amqpstorm import Connection
 
 import configparser
 import queue
+import json
 
 
 # The format in which messages are shared accross the service
@@ -87,7 +88,9 @@ class Messaging:
     def start_consuming(self):
         __channel_consuming.start_consuming()
 
-    # Threadsafe sending of messages
+
+
+    ''' Threadsafe sending of messages '''
     def start_sending(self):
         while True:
             item = self.__queue.get()
@@ -106,3 +109,32 @@ class Messaging:
             if key == MSG_TO_MIRROR_KEYS.CLEAR_SKELETON.name:
                 self.__queue.queue.clear()
             self.__queue.put(MirrorMessage(key, body))
+
+
+
+    ''' HELPERS '''
+    def send_text_to_mirror(self, text, id="", color=(1, 1, 1, 1), halign="center", position={"x":0,"y":0}, font_size=30, fade_in=0.5, stay=10000, fade_out=1):
+        self.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
+            json.dumps({
+             "text": text,
+             "id": id,
+             "position": position,
+             "halign": halign,
+             "font_size": font_size,
+             "color": color,
+             "animation": {
+                 "fade_in": fade_in,
+                 "stay": stay,
+                 "fade_out": fade_out}
+             }))
+
+    def hide_text_message(self, id):
+        self.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
+            json.dumps({
+                "text": "",
+                "id": id,
+                "animation": {
+                    "stay": 0,
+                    "fade_out": 0
+                }
+            }))
