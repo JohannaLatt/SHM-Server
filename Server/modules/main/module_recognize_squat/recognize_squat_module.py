@@ -2,8 +2,7 @@ from Server.modules.abstract_mirror_module import AbstractMirrorModule
 from Server.utils.enums import KINECT_JOINTS, KINECT_BONES
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
 
-from Server.user import USER_STATE
-from Server.user import SQUAT_STAGE
+from Server.user import USER_STATE, SQUAT_STAGE, EXERCISE
 
 from Server.utils.utils import get_angle_between_bones
 
@@ -46,7 +45,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
         self.starting_spine_base_pos = []
 
         # Used to check direction (up or down) every frame
-        self.last_distance_in_y = 0
+        self.last_y_positions = deque(maxlen=self.timeseries_length)
 
         self.repetitions = 0
 
@@ -90,15 +89,15 @@ class RecognizeSquatModule(AbstractMirrorModule):
                     self.squatting = True
                     self.just_finished_squat = False
                     self.send_to_mirror("squat_text", "Squatting...")
-                    self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.NONE)
+                    self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.GOING_DOWN)
 
                 # Determine squat direction
                 if self.squatting:
-                    current_distance_in_y = self.starting_spine_shoulder_pos[1] - spine_shoulder[1]
-                    if (self.last_distance_in_y < current_distance_in_y):
-                        self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.GOING_DOWN)
-                    else:
+                    percent_moved_up = self.percent_moved_up(spine_shoulder[1])
+                    if self.User.get_exercise_stage is SQUAT_STAGE.GOING_DOWN and percent_moved_up > 0.7:
                         self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.GOING_UP)
+                    elif self.User.get_exercise_stage is SQUAT_STAGE.GOING_UP and percent_moved_up < 0.3:
+                        self.User.update_user_state_and_stage(USER_STATE.SQUATTING, SQUAT_STAGE.GOING_DOWN)
 
                 # After moving down, moved back up and knees are straight -> SQUAT COMPLETE
                 # print(abs(self.starting_spine_shoulder_pos[1] - spine_shoulder[1]))
@@ -111,9 +110,10 @@ class RecognizeSquatModule(AbstractMirrorModule):
                         self.starting_spine_base_pos = spine_base
 
                         self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
+                        self.User.user_finished_repetition(EXERCISE.SQUAT)
 
                 # Save the current distance to the initial spine position
-                self.last_distance_in_y = self.starting_spine_shoulder_pos[1] - spine_shoulder[1]
+                self.last_y_positions.append(spine_shoulder[1])
 
         elif self.squatting:
             # Walked away
@@ -126,6 +126,13 @@ class RecognizeSquatModule(AbstractMirrorModule):
             self.send_to_mirror("squat_text", "Squat failed, you walked - resetting", self.red, stay=1)
 
             self.User.update_user_state_and_stage(USER_STATE.NONE, SQUAT_STAGE.NONE)
+
+    def percent_moved_up(self, current_y_pos):
+        moved_up = 0
+        for y_pos in self.last_y_positions:
+            if current_y_pos > y_pos:
+                moved_up += 1
+        return moved_up / len(self.last_y_positions)
 
     # Uses time series data of last x frames to determine if the user was
     # standing in place, ie is ready for a squat. More specifically, we look

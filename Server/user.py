@@ -9,6 +9,10 @@ class USER_STATE(Enum):
     SQUATTING = 2
 
 
+class EXERCISE(Enum):
+    SQUAT = 1
+
+
 class SQUAT_STAGE(Enum):
     NONE = 1
     GOING_DOWN = 2
@@ -25,10 +29,15 @@ class User():
         self.bones = {}
         self.joints = {}
 
+        self.repetitions = 0
+
         # Obtain a lock that has to be used to change the user
         self.lock = ReadWriteLock()
 
     def update_user_state_and_stage(self, state, exercise_stage):
+        if state is USER_STATE.NONE:
+            self.repetitions = 0
+
         self.lock.acquire_write()
         self.state = state
         self.exercise_stage = exercise_stage
@@ -48,6 +57,11 @@ class User():
         self.lock.release_write()
         self.Messaging.consume_internal_message(
             MSG_FROM_INTERNAL.USER_SKELETON_UPDATED.name)
+
+    def user_finished_repetition(self, exercise):
+        self.repetitions += 1
+        self.Messaging.consume_internal_message(
+            MSG_FROM_INTERNAL.USER_REPETITION_FINISHED.name)
 
     def get_user_state(self):
         self.lock.acquire_read()
@@ -72,3 +86,6 @@ class User():
         result = self.joints
         self.lock.release_read()
         return result
+
+    def get_current_repetitions(self):
+        return self.repetitions

@@ -37,6 +37,10 @@ class AbstractMirrorModule(ABC):
         # By default, do nothing with it
         pass
 
+    def user_finished_repetition(self, user):
+        # By default, do nothing with it
+        pass
+
     def run(self):
         while True:
             item = self.__queue.get()
@@ -56,5 +60,7 @@ class AbstractMirrorModule(ABC):
                 self.user_skeleton_updated(self.User)
             elif item.key == MSG_FROM_INTERNAL.USER_EXERCISING_UPDATED.name:
                 self.user_exercising_updated(self.User)
+            elif item.key == MSG_FROM_INTERNAL.USER_REPETITION_FINISHED.name:
+                self.user_finished_repetition(self.User)
 
             self.__queue.task_done()
