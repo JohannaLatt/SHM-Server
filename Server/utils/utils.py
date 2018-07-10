@@ -35,14 +35,14 @@ def lerp_hsv(color_a, color_b, t):
     if color_a[0] > color_b[0]:
         # Swap (a.h, b.h)
         h3 = color_b[0]
-        color_b[0] = color_b[0]
-        color_a[0] = h3
+        color_b = (color_a[0], color_b[1], color_b[2], color_b[3])
+        color_a = (h3, color_a[1], color_a[2], color_a[3])
 
         d = -d;
         t = 1 - t;
 
     if d > 0.5:  # 180deg
-        color_a[0] = color_a[0] + 1  # 360deg
+        color_a = (color_a[0] + 1, color_a[1], color_a[2], color_a[3])  # 360deg
         h = (color_a[0] + t * (color_b[0] - color_a[0]) ) % 1 # 360deg
 
     if d <= 0.5:  # 180deg
