@@ -334,15 +334,9 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
     def change_joint_or_bone_color(self, type, name, color):
         if type =='joint':
-            if color == '':
-                self.colored_joints.remove(name)
-            else:
-                self.colored_joints.add(name)
+            self.colored_joints.add(name) if color == '' else self.colored_joints.remove(name)
         elif type =='bone':
-            if color == '':
-                self.colored_bones.remove(name)
-            else:
-                self.colored_bones.add(name)
+            self.colored_bones.add(name) if color == '' else self.colored_bones.remove(name)
 
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.CHANGE_SKELETON_COLOR.name,
             json.dumps({
