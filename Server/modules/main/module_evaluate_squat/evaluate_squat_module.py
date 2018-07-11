@@ -9,6 +9,7 @@ import json
 import numpy as np
 from collections import deque
 import configparser
+from threading import Timer
 
 
 class EvaluateSquatModule(AbstractMirrorModule):
@@ -28,18 +29,18 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.color_correct = (.33, .7, 1, .7)   # green
 
         # Keep track of UI changes to easily clean them if needed
-        self.text_ids = []
-        self.text_joints = []
-        self.colored_bones = []
-        self.colored_joints = []
+        self.text_ids = set()
+        self.text_id_timers = {}
+        self.text_joints = set()
+        self.text_joints_timers = {}
+        self.colored_bones = set()
+        self.colored_joints = set()
 
         # Shoulder data
         self.rounded_shoulder_warning_angle = Config.getint('EvaluateSquatModule', 'rounded_shoulder_warning_angle', fallback=20)
 
         self.text_id_shoulder_1 = "shoulder_evaluation_1"
         self.text_id_shoulder_2 = "shoulder_evaluation_2"
-        self.text_ids.append(self.text_id_shoulder_1)
-        self.text_ids.append(self.text_id_shoulder_2)
 
         self.shoulder_left_angle_over_time = deque(maxlen=self.timeseries_length)
         self.shoulder_right_angle_over_time = deque(maxlen=self.timeseries_length)
@@ -51,29 +52,25 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.text_id_knees = "knee_evaluation"
         self.text_id_knees_min_1 = "knee_min_evaluation_1"
         self.text_id_knees_min_2 = "knee_min_evaluation_2"
-        self.text_ids.append(self.text_id_knees)
-        self.text_ids.append(self.text_id_knees_min_1)
-        self.text_ids.append(self.text_id_knees_min_2)
 
         self.min_knee_angle_in_current_rep = 180
         self.min_knee_angle_over_time = deque(maxlen=self.repetitions_until_check)
 
         # Looking straight ahead
-        self.tiled_sideways_head_min_warning_angle = Config.getint('EvaluateSquatModule', 'tiled_sideways_head_min_warning_angle', fallback=85)
+        self.tilted_sideways_head_min_warning_angle = Config.getint('EvaluateSquatModule', 'tilted_sideways_head_min_warning_angle', fallback=85)
         self.tilted_up_down_head_min_warning_angle = Config.getint('EvaluateSquatModule', 'tilted_up_down_head_min_warning_angle', fallback=85)
 
         self.text_id_straight_1 = "head_evaluation_1"
         self.text_id_straight_2 = "head_evaluation_2"
-        self.text_ids.append(self.text_id_straight_1)
-        self.text_ids.append(self.text_id_straight_2)
 
         # Knees behind toes
         self.knee_behind_toes_tolerance = Config.getint('EvaluateSquatModule', 'knee_behind_toes_tolerance', fallback=20)
 
         self.text_id_knee_toes_1 = "knee_toes_evaluation_1"
         self.text_id_knee_toes_2 = "knee_toes_evaluation_2"
-        self.text_ids.append(self.text_id_knee_toes_1)
-        self.text_ids.append(self.text_id_knee_toes_2)
+
+        self.knee_over_toe_left = deque(maxlen=self.timeseries_length)
+        self.knee_over_toe_right = deque(maxlen=self.timeseries_length)
 
     def user_skeleton_updated(self, user):
         super().user_skeleton_updated(user)
@@ -110,8 +107,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         average_min_knee_angle = int(np.mean(np.asarray(self.min_knee_angle_over_time)))
         if average_min_knee_angle > self.max_knee_angle_for_warning:
-            self.Messaging.send_text_to_mirror("Your average knee angle is only {}°".format(average_min_knee_angle), self.text_id_knees_min_1, position={"x":-0.02, "y":-0.30}, stay=3, halign="right")
-            self.Messaging.send_text_to_mirror("Try and go lower! ", self.text_id_knees_min_2, position={"x":-0.02, "y":-0.36}, stay=3, halign="right")
+            self.show_message_at_position("Your average knee angle is only {}°".format(average_min_knee_angle), self.text_id_knees_min_1, position={"x":-0.02, "y":-0.10}, stay=3)
+            self.show_message_at_position("Try and go lower! ", self.text_id_knees_min_2, position={"x":-0.02, "y":-0.16}, stay=3)
 
     def tracking_lost(self):
         print("[EvaluateSquatModule][info] Cleaning up")
@@ -128,17 +125,19 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.evaluating = False
 
     def clean_UI(self):
-        for text_ids in self.text_ids:
-            self.Messaging.hide_text_message(text_ids)
+        for text_ids in self.text_ids.copy():
+            self.hide_message_at_position(text_ids)
 
-        for text_joints in self.text_joints:
+        print(str(self.text_joints))
+        for text_joints in self.text_joints.copy():
+            print(text_joints)
             self.hide_message_at_joint(text_joints)
 
     def reset_skeleton_color(self):
-        for colored_bone in self.colored_bones:
+        for colored_bone in self.colored_bones.copy():
             self.change_joint_or_bone_color('bone', colored_bone, '')
 
-        for colored_joint in self.colored_joints:
+        for colored_joint in self.colored_joints.copy():
             self.change_joint_or_bone_color('joint', colored_joint, '')
 
     def show_knee_angles(self):
@@ -156,32 +155,22 @@ class EvaluateSquatModule(AbstractMirrorModule):
             self.show_message_at_joint(str(left_knee_angle) + "°", KINECT_JOINTS.KneeLeft.name)
 
             # Show colored feedback
-            left_color = self.get_color_at_angle(left_knee_angle, 70, 130)
-            self.change_left_leg_color(left_color)
+            left_color = get_color_at_angle(left_knee_angle, 70, 130, self.color_correct, self.color_wrong)
+            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeLeft.name, left_color)
 
-            right_color = self.get_color_at_angle(right_knee_angle, 70, 130)
-            self.change_right_leg_color(right_color)
-        elif KINECT_JOINTS.KneeRight.name is in self.text_joints:
+            right_color = get_color_at_angle(right_knee_angle, 70, 130, self.color_correct, self.color_wrong)
+            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeRight.name, right_color)
+        elif KINECT_JOINTS.KneeRight.name in self.text_joints:
             self.hide_message_at_joint(KINECT_JOINTS.KneeRight.name)
             self.hide_message_at_joint(KINECT_JOINTS.KneeLeft.name)
 
-            self.change_left_leg_color('')
-            self.change_right_leg_color('')
+            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeLeft.name, '')
+            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeRight.name, '')
 
         # Save the angle over time
         angle_over_time = np.mean([right_knee_angle, left_knee_angle])
         if angle_over_time < self.min_knee_angle_in_current_rep:
             self.min_knee_angle_in_current_rep = angle_over_time
-
-    def change_right_leg_color(self, color):
-        self.change_joint_or_bone_color('bone', KINECT_BONES.ThighRight.name, color)
-        self.change_joint_or_bone_color('bone', KINECT_BONES.ShinRight.name, color)
-        self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeRight.name, color)
-
-    def change_left_leg_color(self, color):
-        self.change_joint_or_bone_color('bone', KINECT_BONES.ThighLeft.name, color)
-        self.change_joint_or_bone_color('bone', KINECT_BONES.ShinLeft.name, color)
-        self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeLeft.name, color)
 
     # The shoulders should be pushed out and the user shouldn't round his shoulders
     def check_straight_shoulders(self):
@@ -210,13 +199,12 @@ class EvaluateSquatModule(AbstractMirrorModule):
         if np.mean(np.asarray(self.shoulder_left_angle_over_time)) > self.rounded_shoulder_warning_angle and left_in_front_of_user:
             self.show_message_at_joint(str(left_shoulder_angle) + "°", KINECT_JOINTS.ShoulderLeft.name)
 
-            if KINECT_BONES.ClavicleLeft.name is not in self.colored_bones:
+            if KINECT_BONES.ClavicleLeft.name not in self.colored_bones:
                 self.change_joint_or_bone_color('joint', KINECT_JOINTS.SpineShoulder.name, self.color_wrong)
                 self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleLeft.name, self.color_wrong)
                 self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderLeft.name, self.color_wrong)
 
-                self.Messaging.send_text_to_mirror("Make sure to push your shoulders back,", self.text_id_shoulder_1, position={"x":-0.02, "y":0.33}, stay=3, halign="right")
-                self.Messaging.send_text_to_mirror("right now they are rounded!", self.text_id_shoulder_2, position={"x":-0.02, "y":0.27}, stay=3, halign="right")
+                self.show_shoulder_warning()
         else:
             left_shoulder_okay = True
 
@@ -224,36 +212,97 @@ class EvaluateSquatModule(AbstractMirrorModule):
         if np.mean(np.asarray(self.shoulder_right_angle_over_time)) > self.rounded_shoulder_warning_angle and right_in_front_of_user:
             self.show_message_at_joint(str(right_shoulder_angle) + "°", KINECT_JOINTS.ShoulderRight.name)
 
-            if KINECT_BONES.ClavicleRight.name is not in self.colored_bones:
+            if KINECT_BONES.ClavicleRight.name not in self.colored_bones:
                 self.change_joint_or_bone_color('joint', KINECT_JOINTS.SpineShoulder.name, self.color_wrong)
                 self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleRight.name, self.color_wrong)
                 self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderRight.name, self.color_wrong)
 
-                if self.text_id_shoulder_1 is not in self.text_ids:
-                    self.Messaging.send_text_to_mirror("Make sure to push your shoulders back,", self.text_id_shoulder_1, position={"x":-0.02, "y":0.33}, stay=3, halign="right")
-                    self.Messaging.send_text_to_mirror("right now they are rounded!", self.text_id_shoulder_2, position={"x":-0.02, "y":0.27}, stay=3, halign="right")
-        else:
-            right_shoulder_okay = True
+                self.show_shoulder_warning()
+            else:
+                right_shoulder_okay = True
 
         # Cleanup
-        if left_shoulder_okay and right_shoulder_okay and KINECT_JOINTS.SpineShoulder.name is in self.colored_joints:
+        if left_shoulder_okay and right_shoulder_okay and KINECT_JOINTS.SpineShoulder.name in self.colored_joints:
             self.change_joint_or_bone_color('joint', KINECT_JOINTS.SpineShoulder.name, '')
 
-        if left_shoulder_okay and KINECT_BONES.ClavicleLeft.name is in self.colored_bones:
+        if left_shoulder_okay and KINECT_BONES.ClavicleLeft.name in self.colored_bones:
             self.hide_message_at_joint(KINECT_JOINTS.ShoulderLeft.name)
             self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleLeft.name, '')
             self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderLeft.name, '')
 
-        if right_shoulder_okay and KINECT_BONES.ClavicleRight.name is in self.colored_bones:
+        if right_shoulder_okay and KINECT_BONES.ClavicleRight.name in self.colored_bones:
             self.hide_message_at_joint(KINECT_JOINTS.ShoulderRight.name)
             self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleRight.name, '')
             self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderRight.name, '')
 
+    def show_shoulder_warning(self):
+        if self.text_id_shoulder_1 not in self.text_ids:
+            self.show_message_at_position("Make sure to push your shoulders back,", self.text_id_shoulder_1, position={"x":-0.02, "y":0.33}, stay=3)
+            self.show_message_at_position("right now they are rounded!", self.text_id_shoulder_2, position={"x":-0.02, "y":0.27}, stay=3)
+
     # Check whether the user's knees stay above or behind the toes at all times,
     # i.e. the z-component of the knee is always greater than the toes
     def check_body_behind_toes(self):
-        
-        pass
+        # Left leg
+        left_knee_behind_toes = self.joints[KINECT_JOINTS.KneeLeft.name][2] + self.knee_behind_toes_tolerance - self.joints[KINECT_JOINTS.FootLeft.name][2]
+        self.knee_over_toe_left.append(True) if left_knee_behind_toes < 0 else self.knee_over_toe_left.append(False)
+        left_knee_okay = False
+
+        # Right leg
+        right_knee_behind_toes = self.joints[KINECT_JOINTS.KneeRight.name][2] + self.knee_behind_toes_tolerance - self.joints[KINECT_JOINTS.FootRight.name][2]
+        self.knee_over_toe_right.append(True) if right_knee_behind_toes < 0 else self.knee_over_toe_right.append(False)
+        right_knee_okay = False
+
+        if len(self.knee_over_toe_left) < self.timeseries_length:
+            # not enough data yet
+            return
+
+        # If 70% of the last frames were wrong knee positions...
+        if (self.knee_over_toe_left.count(True)/self.timeseries_length) > 0.7:
+            left_leg_color = get_color_at_angle(left_knee_behind_toes, 10, -20, self.color_correct, self.color_wrong)
+            self.change_left_leg_color(left_leg_color)
+
+            self.show_knee_toe_warning()
+        else:
+            left_knee_okay = True
+
+        # If 70% of the last frames were wrong knee positions...
+        if (self.knee_over_toe_right.count(True)/self.timeseries_length) > 0.7:
+            right_leg_color = get_color_at_angle(right_knee_behind_toes, 10, -20, self.color_correct, self.color_wrong)
+            self.change_right_leg_color(right_leg_color)
+
+            self.show_knee_toe_warning()
+        else:
+            right_knee_okay = True
+
+        # Cleanup
+        if left_knee_okay and KINECT_BONES.FootLeft.name in self.colored_bones:
+            self.change_left_leg_color('')
+
+        if right_knee_okay and KINECT_BONES.FootRight.name in self.colored_bones:
+            self.change_right_leg_color('')
+
+        #if left_knee_okay and right_knee_okay and self.text_id_knee_toes_1 in self.text_ids:
+            #self.hide_message_at_position(self.text_id_knee_toes_1)
+            #self.hide_message_at_position(self.text_id_knee_toes_2)
+
+    def show_knee_toe_warning(self):
+        if self.text_id_knee_toes_1 not in self.text_ids:
+            self.show_message_at_position("Your knee should not be in front", self.text_id_knee_toes_1, position={"x":-0.02, "y":-0.3}, stay=2)
+            self.show_message_at_position("of your toes, try and push your hips further out!", self.text_id_knee_toes_2, position={"x":-0.02, "y":-0.36}, stay=2)
+
+    def change_right_leg_color(self, color):
+        self.change_joint_or_bone_color('bone', KINECT_BONES.ShinRight.name, color)
+        self.change_joint_or_bone_color('bone', KINECT_BONES.FootRight.name, color)
+        self.change_joint_or_bone_color('joint', KINECT_JOINTS.AnkleRight.name, color)
+        self.change_joint_or_bone_color('joint', KINECT_JOINTS.FootRight.name, color)
+
+    def change_left_leg_color(self, color):
+        self.change_joint_or_bone_color('bone', KINECT_BONES.ShinLeft.name, color)
+        self.change_joint_or_bone_color('bone', KINECT_BONES.FootLeft.name, color)
+        self.change_joint_or_bone_color('joint', KINECT_JOINTS.AnkleLeft.name, color)
+        self.change_joint_or_bone_color('joint', KINECT_JOINTS.FootLeft.name, color)
+
 
     # Check whether the user is always facing forward which prevents
     # spine pain and damage.
@@ -274,25 +323,25 @@ class EvaluateSquatModule(AbstractMirrorModule):
         if tilted_up_down < self.tilted_up_down_head_min_warning_angle:
             self.show_message_at_joint(str(tilted_up_down) + "°", KINECT_JOINTS.Head.name)
 
-            head_color = self.get_color_at_angle(90 - tilted_up_down, 0, 90 - self.tilted_up_down_head_min_warning_angle + 5)
+            head_color = get_color_at_angle(90 - tilted_up_down, 0, 90 - self.tilted_up_down_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
 
-            if self.text_id_straight_1 is not in self.text_ids:
+            if self.text_id_straight_1 not in self.text_ids:
                 direction = "up" if self.joints[KINECT_JOINTS.Head.name][2] > self.joints[KINECT_JOINTS.Neck.name][2] else "down"
-                self.Messaging.send_text_to_mirror("Your head is tilted {},".format(direction), self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2, halign="right")
-                self.Messaging.send_text_to_mirror("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2, halign="right")
-        elif tilted_sideways < self.tiled_sideways_head_min_warning_angle:
+                self.show_message_at_position("Your head is tilted {},".format(direction), self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2)
+                self.show_message_at_position("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2)
+        elif tilted_sideways < self.tilted_sideways_head_min_warning_angle:
             self.show_message_at_joint(str(tilted_sideways) + "°", KINECT_JOINTS.Head.name)
 
-            head_color = self.get_color_at_angle(90 - tilted_sideways, 0, 90 - self.tiled_sideways_head_min_warning_angle + 5)
+            head_color = get_color_at_angle(90 - tilted_sideways, 0, 90 - self.tilted_sideways_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
 
-            if self.text_id_straight_1 is not in self.text_ids:
-                self.Messaging.send_text_to_mirror("Your head is tilted sideways,", self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2, halign="right")
-                self.Messaging.send_text_to_mirror("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2, halign="right")
-        elif self.text_id_straight_1 is in self.text_ids:
-            self.Messaging.hide_text_message(self.text_id_straight_1)
-            self.Messaging.hide_text_message(self.text_id_straight_2)
+            if self.text_id_straight_1 not in self.text_ids:
+                self.show_message_at_position("Your head is tilted sideways,", self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2)
+                self.show_message_at_position("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2)
+        elif self.text_id_straight_1 in self.text_ids:
+            self.hide_message_at_position(self.text_id_straight_1)
+            self.hide_message_at_position(self.text_id_straight_2)
             self.hide_message_at_joint(KINECT_JOINTS.Head.name)
             self.set_head_color('')
 
@@ -307,6 +356,11 @@ class EvaluateSquatModule(AbstractMirrorModule):
         return int(angle)
 
     def show_message_at_joint(self, text, joint):
+        # Stop potentially existing timers
+        if joint in self.text_joints_timers:
+            self.text_joints_timers[joint].cancel()
+            del self.text_joints_timers[joint]
+
         self.text_joints.add(joint)
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
             json.dumps({
@@ -320,8 +374,14 @@ class EvaluateSquatModule(AbstractMirrorModule):
                  "fade_out": 1}
             }))
 
+        self.text_joints.add(joint)
+        self.text_joints_timers[joint] = Timer(1001, self.remove_message_from_list, [self.text_joints, self.text_joints_timers, joint])
+        self.text_joints_timers[joint].start()
+
     def hide_message_at_joint(self, joint):
-        self.text_joints.remove(joint)
+        if joint in self.text_joints:
+            self.text_joints.remove(joint)
+
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
             json.dumps({
                 "text": "",
@@ -329,11 +389,34 @@ class EvaluateSquatModule(AbstractMirrorModule):
                 "position": joint
             }))
 
+    def show_message_at_position(self, text, id, position, stay):
+        # Stop potentially existing timers
+        if id in self.text_id_timers:
+            self.text_id_timers[id].cancel()
+            del self.text_id_timers[id]
+
+        self.Messaging.send_text_to_mirror(text, id=id, position=position, stay=stay, halign="right")
+        self.text_ids.add(id)
+        self.text_id_timers[id] = Timer(stay + 1, self.remove_message_from_list, [self.text_ids, self.text_id_timers, id])
+        self.text_id_timers[id].start()
+
+    def hide_message_at_position(self, id):
+        if id in self.text_ids:
+            self.text_ids.remove(id)
+        self.Messaging.hide_text_message(id)
+
+    def remove_message_from_list(self, list_ids, list_timers, id):
+        print("removing {}".format(id))
+        if id in list_ids:
+            list_ids.remove(id)
+        if id in list_timers:
+            del list_timers[id]
+
     def change_joint_or_bone_color(self, type, name, color):
         if type =='joint':
-            self.colored_joints.add(name) if color == '' else self.colored_joints.remove(name)
+            self.colored_joints.remove(name) if color == '' else self.colored_joints.add(name)
         elif type =='bone':
-            self.colored_bones.add(name) if color == '' else self.colored_bones.remove(name)
+            self.colored_bones.remove(name) if color == '' else self.colored_bones.add(name)
 
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.CHANGE_SKELETON_COLOR.name,
             json.dumps({
