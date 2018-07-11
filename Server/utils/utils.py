@@ -28,6 +28,22 @@ def get_angle_between_bones(joints, bones, bone_a, bone_b):
     return angle
 
 # Colors
+def get_color_at_angle(self, angle, angle_min, angle_max):
+    ''' Returns a color between red and green depending
+        on the input angle and the max and min angles.
+        Smaller equals right color, bigger wrong. '''
+
+    # Transform the angle to a value between 0 and 1
+    if angle < angle_min:
+        t = 0
+    elif angle > angle_max:
+        t = 1
+    else:
+        t = (angle - angle_min) / (angle_max - angle_min)
+
+    # Calculate the interpolated color
+    return lerp_hsv(self.color_correct, self.color_wrong, t)
+
 def lerp_hsv(color_a, color_b, t):
     # Hue interpolation
     d = color_b[0] - color_a[0]
