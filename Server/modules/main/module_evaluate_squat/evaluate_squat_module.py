@@ -67,8 +67,6 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.text_ids.append(self.text_id_straight_1)
         self.text_ids.append(self.text_id_straight_2)
 
-        self.show_head_warning = False
-
         # Knees behind toes
         self.knee_behind_toes_tolerance = Config.getint('EvaluateSquatModule', 'knee_behind_toes_tolerance', fallback=20)
 
@@ -76,7 +74,6 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.text_id_knee_toes_2 = "knee_toes_evaluation_2"
         self.text_ids.append(self.text_id_knee_toes_1)
         self.text_ids.append(self.text_id_knee_toes_2)
-
 
     def user_skeleton_updated(self, user):
         super().user_skeleton_updated(user)
@@ -255,7 +252,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
     # Check whether the user's knees stay above or behind the toes at all times,
     # i.e. the z-component of the knee is always greater than the toes
     def check_body_behind_toes(self):
-        # Left leg
+        
         pass
 
     # Check whether the user is always facing forward which prevents
