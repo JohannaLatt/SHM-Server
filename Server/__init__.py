@@ -27,4 +27,5 @@ thread = threading.Thread(target=messaging.start_consuming)
 thread.daemon = True
 thread.start()
 
-app.run(host='0.0.0.0', port=PORT, debug=False)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=PORT, debug=False)
