@@ -9,7 +9,6 @@ import json
 import numpy as np
 from collections import deque
 import configparser
-from threading import Timer
 
 
 class EvaluateSquatModule(AbstractMirrorModule):
