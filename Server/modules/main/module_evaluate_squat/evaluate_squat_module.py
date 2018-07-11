@@ -256,7 +256,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         # If 70% of the last frames were wrong knee positions...
         if (self.knee_over_toe_left.count(True)/self.timeseries_length) > 0.7:
-            left_leg_color = get_color_at_angle(left_knee_behind_toes, 10, -20, self.color_correct, self.color_wrong)
+            left_leg_color = get_color_at_angle(left_knee_behind_toes, -200, 0, self.color_correct, self.color_wrong)
             self.change_left_leg_color(left_leg_color)
 
             self.show_knee_toe_warning()
@@ -265,7 +265,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         # If 70% of the last frames were wrong knee positions...
         if (self.knee_over_toe_right.count(True)/self.timeseries_length) > 0.7:
-            right_leg_color = get_color_at_angle(right_knee_behind_toes, 10, -20, self.color_correct, self.color_wrong)
+            right_leg_color = get_color_at_angle(right_knee_behind_toes, -200, 0, self.color_correct, self.color_wrong)
             self.change_right_leg_color(right_leg_color)
 
             self.show_knee_toe_warning()
@@ -371,21 +371,29 @@ class EvaluateSquatModule(AbstractMirrorModule):
                 "id": joint,
                 "position": joint
             }))
-        self.text_ids.remove(joint)
+        if joint in self.text_ids:
+            self.text_ids.remove(joint)
 
     def show_message_at_position(self, text, id, position, stay=10000):
         self.Messaging.send_text_to_mirror(text, id=id, position=position, stay=stay, halign="right")
         self.text_ids.add(id)
 
     def hide_message_at_position(self, id):
-        self.text_ids.remove(id)
         self.Messaging.hide_text_message(id)
+        if id in self.text_ids:
+            self.text_ids.remove(id)
 
     def change_joint_or_bone_color(self, type, name, color):
         if type =='joint':
-            self.colored_joints.remove(name) if color == '' else self.colored_joints.add(name)
+            if color == '' and name in self.colored_joints:
+                self.colored_joints.remove(name)
+            elif color != '':
+                self.colored_joints.add(name)
         elif type =='bone':
-            self.colored_bones.remove(name) if color == '' else self.colored_bones.add(name)
+            if color == '' and name in self.colored_bones:
+                self.colored_bones.remove(name)
+            elif color != '':
+                self.colored_bones.add(name)
 
         self.Messaging.send_message(MSG_TO_MIRROR_KEYS.CHANGE_SKELETON_COLOR.name,
             json.dumps({
