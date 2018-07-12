@@ -81,6 +81,8 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 self.starting_spine_shoulder_pos = spine_shoulder
                 self.starting_spine_base_pos = spine_base
 
+                self.send_to_mirror("squat_text", "Go ahead and start squatting!")
+
 
             if self.ready_to_squat:
                 # Moving down -> SQUAT STARTED
