@@ -65,7 +65,7 @@ class Messaging:
 
     def _initiate_message_consuming(self):
         self.__initiate_messaging_from_outside('from-mirror', MSG_FROM_MIRROR_KEYS, self.consume_mirror_message)
-        self.__initiate_messaging_from_outside('from-kinect', MSG_FROM_KINECT_KEYS, self.consume_kinect_message)
+        self.__initiate_messaging_from_outside('from-kinect-skeleton', MSG_FROM_KINECT_KEYS, self.consume_kinect_message)
 
     def __initiate_messaging_from_outside(self, name, keys, consume_callback):
         # Create an exchange for the messages of the exchange with 'name'
