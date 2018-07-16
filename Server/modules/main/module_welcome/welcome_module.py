@@ -29,6 +29,11 @@ class WelcomeModule(AbstractMirrorModule):
             self.remind_user_timer.cancel()
         self.Messaging.send_text_to_mirror("I can see you! :-)", id="Welcome", position={"x": 0, "y": 0.2}, font_size=38, halign="center", fade_in = 0.5, stay=1, fade_out=0.5)
 
+    def tracking_data(self, data):
+        super().tracking_data(data)
+        if self.remind_user_timer is not None:
+            self.remind_user_timer.cancel()    
+
     def tracking_lost(self):
         super().tracking_lost()
         print("[WelcomeModule][info] Tracking Lost")
