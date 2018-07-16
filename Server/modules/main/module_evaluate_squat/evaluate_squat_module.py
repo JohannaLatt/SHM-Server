@@ -55,8 +55,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
         self.showing_knee_warning = False
 
         # Looking straight ahead
-        self.tilted_sideways_head_min_warning_angle = Config.getint('EvaluateSquatModule', 'tilted_sideways_head_min_warning_angle', fallback=85)
-        self.tilted_up_down_head_min_warning_angle = Config.getint('EvaluateSquatModule', 'tilted_up_down_head_min_warning_angle', fallback=85)
+        self.tilted_sideways_head_min_warning_angle = Config.getint('EvaluateSquatModule', 'tilted_sideways_head_min_warning_angle', fallback=5)
+        self.tilted_up_down_head_min_warning_angle = Config.getint('EvaluateSquatModule', 'tilted_up_down_head_min_warning_angle', fallback=5)
 
         self.text_id_straight_1 = "head_evaluation_1"
         self.text_id_straight_2 = "head_evaluation_2"
@@ -310,7 +310,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         # Check for x-axis perpendicularity
         x_axis = (1, 0, 0)
-        tilted_sideways = self.clean_angle(angle_between(x_axis, head_vector))
+        tilted_sideways = 90 - self.clean_angle(angle_between(x_axis, head_vector))
         if tilted_sideways < self.tilted_up_down_head_min_warning_angle:
             self.head_tilted_sideways_over_time.append(True)
         else:
@@ -318,7 +318,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         # Check for z-perpendicularity
         y_axis = (0, 0, 1)
-        tilted_up_down = self.clean_angle(angle_between(y_axis, head_vector)) + 10
+        tilted_up_down = 90 - self.clean_angle(angle_between(y_axis, head_vector))
         if tilted_up_down < self.tilted_up_down_head_min_warning_angle:
             self.head_tilted_up_down_over_time.append(True)
         else:
@@ -330,27 +330,27 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         # If 70% of the last frames were wrong head positions...
         if (self.head_tilted_up_down_over_time.count(True)/self.timeseries_length) > 0.7:
-            msg = str(90 - tilted_sideways) + "°"
+            msg = str(tilted_up_down) + "°"
             self.show_message_at_joint(msg, KINECT_JOINTS.Head.name)
 
-            head_color = get_color_at_angle(90 - tilted_sideways, 0, 90 - self.tilted_sideways_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
-            self.set_head_color(head_color)
-
-            if not self.showing_head_warning:
-                self.showing_head_warning = True
-                self.show_message_at_position("Your head is tilted sideways,", self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2)
-                self.show_message_at_position("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2)
-        elif (self.head_tilted_sideways_over_time.count(True)/self.timeseries_length) > 0.7:
-            msg = str(90 - tilted_up_down) + "°"
-            self.show_message_at_joint(msg, KINECT_JOINTS.Head.name)
-
-            head_color = get_color_at_angle(90 - tilted_up_down, 0, 90 - self.tilted_up_down_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
+            head_color = get_color_at_angle(tilted_up_down, 0, self.tilted_up_down_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
 
             if not self.showing_head_warning:
                 self.showing_head_warning = True
                 direction = "up" if self.joints[KINECT_JOINTS.Head.name][2] > self.joints[KINECT_JOINTS.Neck.name][2] else "down"
                 self.show_message_at_position("Your head is tilted {},".format(direction), self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2)
+                self.show_message_at_position("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2)
+        elif (self.head_tilted_sideways_over_time.count(True)/self.timeseries_length) > 0.7:
+            msg = str(tilted_sideways) + "°"
+            self.show_message_at_joint(msg, KINECT_JOINTS.Head.name)
+
+            head_color = get_color_at_angle(tilted_sideways, 0, self.tilted_sideways_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
+            self.set_head_color(head_color)
+
+            if not self.showing_head_warning:
+                self.showing_head_warning = True
+                self.show_message_at_position("Your head is tilted sideways,", self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2)
                 self.show_message_at_position("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2)
         elif self.showing_head_warning:
             self.showing_head_warning = False
