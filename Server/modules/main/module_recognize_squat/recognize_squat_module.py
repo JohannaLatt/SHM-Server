@@ -73,11 +73,14 @@ class RecognizeSquatModule(AbstractMirrorModule):
         elif user.get_user_state() is USER_STATE.NONE and self.squatting:
             # Walked away
             print("[RecognizeSquatModule][info] Walked away")
-            self.repetitions = 0
+
             self.ready_to_squat = False
             self.squatting = False
             self.standing_straight = False
-            self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions), stay=3)
+
+            if self.repetitions > 0:
+                self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions), stay=1)
+                self.repetitions = 0
 
     def user_skeleton_updated(self, user):
         super().user_skeleton_updated(user)

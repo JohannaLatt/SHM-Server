@@ -41,7 +41,7 @@ class RecognizeReadyForExerciseModule(AbstractMirrorModule):
         if is_standing_still and self.knees_are_straight() and user.get_user_state() is USER_STATE.NONE:
             self.User.update_state(USER_STATE.READY_TO_EXERCISE)
             self.Messaging.send_text_to_mirror("Go ahead and start exercising!", id="exercise_status_text", position={"x": 0.03, "y": -0.39}, font_size=30, fade_in=0.3, stay=100000, fade_out=1, halign="left")
-        elif not is_standing_still and user.get_user_state() is USER_STATE.EXERCISING:
+        elif not is_standing_still and user.get_user_state() is not USER_STATE.NONE:
             self.User.update_state(USER_STATE.NONE)
             self.Messaging.send_text_to_mirror("Please get into position in front of the camera and stand still...", id="exercise_status_text", position={"x": 0.03, "y": -0.39}, stay=10000, halign="left")
 
