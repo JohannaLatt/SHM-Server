@@ -35,20 +35,36 @@ class User():
         # Obtain a lock that has to be used to change the user
         self.lock = ReadWriteLock()
 
-    def update_user_excercise(self, state, exercise, exercise_stage):
-        if state is USER_STATE.NONE:
-            self.repetitions = 0
-
-        if exercise != self.exercise:
-            self.repetitions = 0
+    def update_state(self, state):
+        if state is USER_STATE.NONE or state is USER_STATE.READY_TO_EXERCISE:
+            self.__set_repetitions(0)
+            self.update_exercise(EXERCISE.NONE)
+            self.update_exercise_stage(UP_DOWN_EXERCISE_STAGE.NONE)
 
         self.lock.acquire_write()
         self.state = state
+        self.lock.release_write()
+        self.Messaging.consume_internal_message(
+            MSG_FROM_INTERNAL.USER_STATE_UPDATED.name)
+
+    def update_exercise(self, exercise):
+        if exercise is not EXERCISE.NONE:
+            self.update_state(USER_STATE.EXERCISING)
+
+        self.__set_repetitions(0)
+
+        self.lock.acquire_write()
         self.exercise = exercise
+        self.lock.release_write()
+        self.Messaging.consume_internal_message(
+            MSG_FROM_INTERNAL.USER_EXERCISE_UPDATED.name)
+
+    def update_exercise_stage(self, exercise_stage):
+        self.lock.acquire_write()
         self.exercise_stage = exercise_stage
         self.lock.release_write()
         self.Messaging.consume_internal_message(
-            MSG_FROM_INTERNAL.USER_EXERCISING_UPDATED.name)
+            MSG_FROM_INTERNAL.USER_EXERCISE_STAGE_UPDATED.name)
 
     def update_bones(self, bones):
         self.lock.acquire_write()
@@ -63,8 +79,13 @@ class User():
         self.Messaging.consume_internal_message(
             MSG_FROM_INTERNAL.USER_SKELETON_UPDATED.name)
 
+    def __set_repetitions(self, repetitions):
+        self.lock.acquire_write()
+        self.repetitions = repetitions
+        self.lock.release_write()
+
     def user_finished_repetition(self):
-        self.repetitions += 1
+        self.__set_repetitions(self.get_current_repetitions() + 1)
         self.Messaging.consume_internal_message(
             MSG_FROM_INTERNAL.USER_REPETITION_FINISHED.name)
 
@@ -99,4 +120,7 @@ class User():
         return result
 
     def get_current_repetitions(self):
-        return self.repetitions
+        self.lock.acquire_read()
+        result = self.repetitions
+        self.lock.release_read()
+        return result

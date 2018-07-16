@@ -33,7 +33,15 @@ class AbstractMirrorModule(ABC):
         # By default, do nothing with it
         pass
 
-    def user_exercising_updated(self, user):
+    def user_state_updated(self, user):
+        # By default, do nothing with it
+        pass
+
+    def user_exercise_updated(self, user):
+        # By default, do nothing with it
+        pass
+
+    def user_exercise_stage_updated(self, user):
         # By default, do nothing with it
         pass
 
@@ -58,8 +66,12 @@ class AbstractMirrorModule(ABC):
                 self.tracking_lost()
             elif item.key == MSG_FROM_INTERNAL.USER_SKELETON_UPDATED.name:
                 self.user_skeleton_updated(self.User)
-            elif item.key == MSG_FROM_INTERNAL.USER_EXERCISING_UPDATED.name:
-                self.user_exercising_updated(self.User)
+            elif item.key == MSG_FROM_INTERNAL.USER_STATE_UPDATED.name:
+                self.user_state_updated(self.User)
+            elif item.key == MSG_FROM_INTERNAL.USER_EXERCISE_UPDATED.name:
+                self.user_exercise_updated(self.User)
+            elif item.key == MSG_FROM_INTERNAL.USER_EXERCISE_STAGE_UPDATED.name:
+                self.user_exercise_stage_updated(self.User)
             elif item.key == MSG_FROM_INTERNAL.USER_REPETITION_FINISHED.name:
                 self.user_finished_repetition(self.User)
 
