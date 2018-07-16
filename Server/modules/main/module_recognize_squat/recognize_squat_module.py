@@ -76,10 +76,9 @@ class RecognizeSquatModule(AbstractMirrorModule):
 
             self.ready_to_squat = False
             self.squatting = False
-            self.standing_straight = False
 
             if self.repetitions > 0:
-                self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions), stay=1)
+                self.send_to_mirror("exercise_repetitions", "Repetitions: {}".format(self.repetitions), stay=1)
                 self.repetitions = 0
 
     def user_skeleton_updated(self, user):
@@ -125,7 +124,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
                         self.starting_spine_shoulder_pos = spine_shoulder
                         self.starting_spine_base_pos = spine_base
 
-                        self.send_to_mirror("squat_repetitions", "Repetitions: {}".format(self.repetitions))
+                        self.send_to_mirror("exercise_repetitions", "Repetitions: {}".format(self.repetitions))
                         self.User.user_finished_repetition()
 
                 # Save the current distance to the initial spine position
@@ -161,11 +160,11 @@ class RecognizeSquatModule(AbstractMirrorModule):
         # print("[RecognizeSquatModule][info] Cleaning up")
         super().tracking_lost()
         self.__reset_variables()
-        self.send_to_mirror("squat_repetitions", "", stay=0)
+        self.send_to_mirror("exercise_repetitions", "", stay=0)
         self.send_to_mirror("exercise_status_text", "", stay=0)
 
     def send_to_mirror(self, id, text, color=(1, 1, 1, 1), stay=10000):
         if id == "exercise_status_text":
             self.Messaging.send_text_to_mirror(text, id=id, position={"x": 0.03, "y": -0.39}, font_size=30, color=color, fade_in=0.3, stay=stay, fade_out=1, halign="left")
-        elif id == "squat_repetitions":
+        elif id == "exercise_repetitions":
             self.Messaging.send_text_to_mirror("Repetitions: {}".format(self.repetitions), id=id, position={"x": 0.03, "y": -0.45}, font_size=30, color=color, fade_in=0.5, stay=stay, fade_out=1, halign="left")
