@@ -6,18 +6,18 @@ from Server.utils.read_write_lock import ReadWriteLock
 
 class USER_STATE(Enum):
     NONE = 1
-    SQUATTING = 2
-
+    READY_TO_EXERCISE = 3
+    EXERCISING = 2
 
 class EXERCISE(Enum):
-    SQUAT = 1
+    NONE = 1
+    SQUAT = 2
+    BICEPS_CURL = 3
 
-
-class SQUAT_STAGE(Enum):
+class UP_DOWN_EXERCISE_STAGE(Enum):
     NONE = 1
     GOING_DOWN = 2
     GOING_UP = 3
-
 
 class User():
 
@@ -25,7 +25,8 @@ class User():
         self.Messaging = Messaging
 
         self.state = USER_STATE.NONE
-        self.exercise_stage = SQUAT_STAGE.NONE
+        self.exercise = EXERCISE.NONE
+        self.exercise_stage = UP_DOWN_EXERCISE_STAGE.NONE
         self.bones = {}
         self.joints = {}
 
@@ -34,12 +35,16 @@ class User():
         # Obtain a lock that has to be used to change the user
         self.lock = ReadWriteLock()
 
-    def update_user_state_and_stage(self, state, exercise_stage):
+    def update_user_excercise(self, state, exercise, exercise_stage):
         if state is USER_STATE.NONE:
+            self.repetitions = 0
+
+        if exercise != self.exercise:
             self.repetitions = 0
 
         self.lock.acquire_write()
         self.state = state
+        self.exercise = exercise
         self.exercise_stage = exercise_stage
         self.lock.release_write()
         self.Messaging.consume_internal_message(
@@ -58,7 +63,7 @@ class User():
         self.Messaging.consume_internal_message(
             MSG_FROM_INTERNAL.USER_SKELETON_UPDATED.name)
 
-    def user_finished_repetition(self, exercise):
+    def user_finished_repetition(self):
         self.repetitions += 1
         self.Messaging.consume_internal_message(
             MSG_FROM_INTERNAL.USER_REPETITION_FINISHED.name)
@@ -66,6 +71,12 @@ class User():
     def get_user_state(self):
         self.lock.acquire_read()
         result = self.state
+        self.lock.release_read()
+        return result
+
+    def get_exercise(self):
+        self.lock.acquire_read()
+        result = self.exercise
         self.lock.release_read()
         return result
 

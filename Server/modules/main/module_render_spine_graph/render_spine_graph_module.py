@@ -1,6 +1,6 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
 from Server.utils.enums import MSG_TO_MIRROR_KEYS, KINECT_JOINTS
-from Server.user import USER_STATE
+from Server.user import USER_STATE, EXERCISE
 
 import json
 import configparser
@@ -24,7 +24,7 @@ class RenderSpineGraphModule(AbstractMirrorModule):
     def user_skeleton_updated(self, user):
         super().user_skeleton_updated(user)
 
-        if user.get_user_state() is USER_STATE.SQUATTING:
+        if user.get_user_state() is USER_STATE.EXERCISING and user.get_exercise() is EXERCISE.SQUAT:
             # Send the spine data to the mirror
             joints = user.get_joints()
             spine_base = joints[self.joint_for_graph]

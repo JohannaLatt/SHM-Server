@@ -1,6 +1,6 @@
 from Server.modules.abstract_mirror_module import AbstractMirrorModule
 
-from Server.user import USER_STATE, SQUAT_STAGE
+from Server.user import USER_STATE, EXERCISE, UP_DOWN_EXERCISE_STAGE
 
 from Server.utils.enums import MSG_TO_MIRROR_KEYS, KINECT_JOINTS, KINECT_BONES
 from Server.utils.utils import angle_between, lerp_hsv, get_angle_between_bones, get_vector_of_bone, get_color_at_angle
@@ -79,7 +79,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
         super().user_skeleton_updated(user)
 
         # Check if the user is currently doing a squat
-        if user.get_user_state() is USER_STATE.SQUATTING:
+        if user.get_user_state() is USER_STATE.EXERCISING and user.get_exercise() is EXERCISE.SQUAT:
             self.evaluating = True
 
             self.joints = user.get_joints()
