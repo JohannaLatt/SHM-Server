@@ -137,19 +137,6 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 moved_up += 1
         return moved_up / len(self.last_y_positions)
 
-    # Uses time series data of last x frames to determine if the user was
-    # standing in place, ie is ready for a squat. More specifically, we look
-    # at the standard deviation of the x- and z-position of two spine bones
-    # over the last x frames
-    def is_standing_still(self):
-        std_spine_base_movement = np.std(np.asarray(self.pos_spine_base), axis=0)
-        std_spine_shoulder_movement = np.std(np.asarray(self.pos_spine_shoulder), axis=0)
-
-        return (std_spine_base_movement[0] < self.max_std_x
-                and std_spine_base_movement[2] < self.max_std_z
-                and std_spine_shoulder_movement[0] < self.max_std_x
-                and std_spine_shoulder_movement[2] < self.max_std_z)
-
     def knees_are_straight(self):
         right_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighRight, KINECT_BONES.ShinRight)
         left_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighLeft, KINECT_BONES.ShinLeft)
