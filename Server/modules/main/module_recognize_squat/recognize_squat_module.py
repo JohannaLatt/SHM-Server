@@ -165,27 +165,6 @@ class RecognizeSquatModule(AbstractMirrorModule):
 
     def send_to_mirror(self, id, text, color=(1, 1, 1, 1), stay=10000):
         if id == "squat_text":
-            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
-                json.dumps({
-                 "text": text,
-                 "id": id,
-                 "position": {"x": 0.03, "y": -0.39},
-                 "font_size": 30,
-                 "color": color,
-                 "animation": {
-                     "fade_in": 0.3,
-                     "stay": stay,
-                     "fade_out": 1}
-                 }))
+            self.Messaging.send_text_to_mirror(text, id=id, position={"x": 0.03, "y": -0.39}, font_size=30, color=color, fade_in=0.3, stay=stay, fade_out=1, halign="left")
         elif id == "squat_repetitions":
-            self.Messaging.send_message(MSG_TO_MIRROR_KEYS.TEXT.name,
-                json.dumps({
-                 "text": "Repetitions: {}".format(self.repetitions),
-                 "id": id,
-                 "font_size": 30,
-                 "position": {"x": 0.03, "y": -0.45},
-                 "animation": {
-                     "fade_in": 0.5,
-                     "stay": stay,
-                     "fade_out": 1}
-                }))
+            self.Messaging.send_text_to_mirror("Repetitions: {}".format(self.repetitions), id=id, position={"x": 0.03, "y": -0.45}, font_size=30, color=color, fade_in=0.5, stay=stay, fade_out=1, halign="left")
