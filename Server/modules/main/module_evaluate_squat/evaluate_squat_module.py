@@ -309,10 +309,11 @@ class EvaluateSquatModule(AbstractMirrorModule):
 
         # Check for z-perpendicularity
         y_axis = (0, 0, 1)
-        tilted_up_down = self.clean_angle(angle_between(y_axis, head_vector))
+        tilted_up_down = self.clean_angle(angle_between(y_axis, head_vector)) + 10
 
         if tilted_up_down < self.tilted_up_down_head_min_warning_angle:
-            self.show_message_at_joint(str(tilted_up_down) + "°", KINECT_JOINTS.Head.name)
+            msg = str(90 - tilted_up_down) + "°"
+            self.show_message_at_joint(msg, KINECT_JOINTS.Head.name)
 
             head_color = get_color_at_angle(90 - tilted_up_down, 0, 90 - self.tilted_up_down_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
@@ -323,7 +324,8 @@ class EvaluateSquatModule(AbstractMirrorModule):
                 self.show_message_at_position("Your head is tilted {},".format(direction), self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2)
                 self.show_message_at_position("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2)
         elif tilted_sideways < self.tilted_sideways_head_min_warning_angle:
-            self.show_message_at_joint(str(tilted_sideways) + "°", KINECT_JOINTS.Head.name)
+            msg = str(90 - tilted_sideways) + "°"
+            self.show_message_at_joint(msg, KINECT_JOINTS.Head.name)
 
             head_color = get_color_at_angle(90 - tilted_sideways, 0, 90 - self.tilted_sideways_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
