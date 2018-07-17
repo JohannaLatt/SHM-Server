@@ -311,7 +311,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
         # Check for x-axis perpendicularity
         x_axis = (1, 0, 0)
         tilted_sideways = 90 - self.clean_angle(angle_between(x_axis, head_vector))
-        if tilted_sideways < self.tilted_up_down_head_min_warning_angle:
+        if tilted_sideways > self.tilted_up_down_head_min_warning_angle:
             self.head_tilted_sideways_over_time.append(True)
         else:
             self.head_tilted_sideways_over_time.append(False)
@@ -319,7 +319,7 @@ class EvaluateSquatModule(AbstractMirrorModule):
         # Check for z-perpendicularity
         y_axis = (0, 0, 1)
         tilted_up_down = 90 - self.clean_angle(angle_between(y_axis, head_vector))
-        if tilted_up_down < self.tilted_up_down_head_min_warning_angle:
+        if tilted_up_down > self.tilted_up_down_head_min_warning_angle:
             self.head_tilted_up_down_over_time.append(True)
         else:
             self.head_tilted_up_down_over_time.append(False)

@@ -11,8 +11,8 @@ import numpy as np
 class RecognizeReadyForExerciseModule(AbstractMirrorModule):
 
     timeseries_length = 20
-    max_std_x = 40
-    max_std_z = 100
+    max_std_x = 60
+    max_std_z = 130
 
     def __init__(self, Messaging, queue, User):
         super().__init__(Messaging, queue, User)
