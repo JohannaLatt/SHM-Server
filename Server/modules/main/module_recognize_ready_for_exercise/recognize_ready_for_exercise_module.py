@@ -66,4 +66,4 @@ class RecognizeReadyForExerciseModule(AbstractMirrorModule):
 
     def tracking_lost(self):
         super().tracking_lost()
-        self.send_to_mirror("exercise_status_text", "", stay=0)
+        self.Messaging.send_text_to_mirror("exercise_status_text", "", stay=0)
