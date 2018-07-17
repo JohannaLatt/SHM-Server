@@ -51,7 +51,8 @@ class User():
         if exercise is not EXERCISE.NONE:
             self.update_state(USER_STATE.EXERCISING)
 
-        self.__set_repetitions(0)
+        if exercise is not self.exercise:
+            self.__set_repetitions(0)
 
         self.lock.acquire_write()
         self.exercise = exercise
@@ -85,7 +86,9 @@ class User():
         self.lock.release_write()
 
     def user_finished_repetition(self):
-        self.__set_repetitions(self.get_current_repetitions() + 1)
+        self.lock.acquire_write()
+        self.repetitions += 1
+        self.lock.release_write()
         self.Messaging.consume_internal_message(
             MSG_FROM_INTERNAL.USER_REPETITION_FINISHED.name)
 

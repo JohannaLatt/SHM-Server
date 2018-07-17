@@ -117,15 +117,15 @@ class RecognizeSquatModule(AbstractMirrorModule):
                 # After moving down, moved back up and knees are straight -> SQUAT COMPLETE
                 # print(abs(self.starting_spine_shoulder_pos[1] - spine_shoulder[1]))
                 if not self.just_finished_squat and self.squatting and self.knees_are_straight() and abs(self.starting_spine_shoulder_pos[1] - spine_shoulder[1]) < self.threshold_equal_y_pos:
-                        self.just_finished_squat = True
-                        self.repetitions += 1
+                    self.just_finished_squat = True
+                    self.repetitions += 1
 
-                        # Reset squat variables
-                        self.starting_spine_shoulder_pos = spine_shoulder
-                        self.starting_spine_base_pos = spine_base
+                    # Reset squat variables
+                    self.starting_spine_shoulder_pos = spine_shoulder
+                    self.starting_spine_base_pos = spine_base
 
-                        self.send_to_mirror("exercise_repetitions", "Repetitions: {}".format(self.repetitions))
-                        self.User.user_finished_repetition()
+                    self.send_to_mirror("exercise_repetitions", "Repetitions: {}".format(self.repetitions))
+                    self.User.user_finished_repetition()
 
                 # Save the current distance to the initial spine position
                 self.last_y_positions.append(spine_shoulder[1])
@@ -141,7 +141,7 @@ class RecognizeSquatModule(AbstractMirrorModule):
         right_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighRight, KINECT_BONES.ShinRight)
         left_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighLeft, KINECT_BONES.ShinLeft)
 
-        return  right_knee_angle < 10 and left_knee_angle < 10
+        return  right_knee_angle < 20 and left_knee_angle < 20
 
     def tracking_lost(self):
         # print("[RecognizeSquatModule][info] Cleaning up")

@@ -11,8 +11,8 @@ import numpy as np
 class RecognizeReadyForExerciseModule(AbstractMirrorModule):
 
     timeseries_length = 20
-    max_std_x = 60
-    max_std_z = 130
+    max_std_x = 80
+    max_std_z = 160
 
     def __init__(self, Messaging, queue, User):
         super().__init__(Messaging, queue, User)
@@ -62,7 +62,7 @@ class RecognizeReadyForExerciseModule(AbstractMirrorModule):
         right_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighRight, KINECT_BONES.ShinRight)
         left_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighLeft, KINECT_BONES.ShinLeft)
 
-        return  right_knee_angle < 10 and left_knee_angle < 10
+        return  right_knee_angle < 30 and left_knee_angle < 30
 
     def tracking_lost(self):
         super().tracking_lost()
