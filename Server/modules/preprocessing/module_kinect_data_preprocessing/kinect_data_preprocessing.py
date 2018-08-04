@@ -1,5 +1,6 @@
 from Server.modules.abstract_preprocessing_module import AbstractPreprocessingModule
 from Server.utils.mapping import KinectBoneMapping
+from Server.utils.enums import KINECT_JOINTS
 
 import json
 
@@ -38,10 +39,11 @@ class KinectDataPreprocessing(AbstractPreprocessingModule):
         # Load string as json
         data = json.loads(data)
 
-        # Save the data to the user
-        # (since this project was build for and with the Kinect, no further
-        # data processing is necessary. Other tracking systems might send the
-        # data in a different format or have more or less joints than the
-        # Kinect-reference-joint structure and would require actual pre
-        # processing at this point)
-        self.User.update_joints(data)
+        # Remove "ThumbRight", "ThumbLeft", "HandTipRight" and "HandTipLeft"
+        # since they are not expected by the User-object
+        del data[KINECT_JOINTS.HandTipLeft.name]
+        del data[KINECT_JOINTS.HandTipRight.name]
+        del data[KINECT_JOINTS.ThumbLeft.name]
+        del data[KINECT_JOINTS.ThumbRight.name]
+
+        super().update_user_joints(data)
