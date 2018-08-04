@@ -20,7 +20,7 @@ class Messaging:
 
     def __init__(self):
         # Queue to save all incoming messages
-        self.message_queue = queue.Queue()
+        self.incoming_msgs_queue = queue.Queue()
 
         # Create a messaging connection
         Config = configparser.ConfigParser()
@@ -38,27 +38,27 @@ class Messaging:
     # Callback for consuming incoming messages from the Mirror
     def consume_mirror_message(self, message):
         if message.method['routing_key'] == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:
-            self.message_queue.put(MirrorMessage(MSG_FROM_MIRROR_KEYS.MIRROR_READY.name, ''))
+            self.incoming_msgs_queue.put(MirrorMessage(MSG_FROM_MIRROR_KEYS.MIRROR_READY.name, ''))
         else:
             print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
     # Callback for consuming incoming messages from the Kinect
     def consume_kinect_message(self, message):
         if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
-            self.message_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name, ''))
+            self.incoming_msgs_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name, ''))
         elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_DATA.name:
-            self.message_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_DATA.name, message.body))
+            self.incoming_msgs_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_DATA.name, message.body))
         elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_LOST.name:
-            self.message_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_LOST.name, ''))
+            self.incoming_msgs_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_LOST.name, ''))
         else:
             print('[Messaging][warning] Received unknown key {}'.format(message.method['routing_key']))
 
     def consume_internal_message(self, key):
-        self.message_queue.put(MirrorMessage(key, ''))
+        self.incoming_msgs_queue.put(MirrorMessage(key, ''))
 
     def _initiate_messaging_to_mirror(self):
         # Save the queue
-        self.__queue = queue.Queue()
+        self.outgoing_msgs_queue = queue.Queue()
 
         # Create an exchange for the mirror-messages - type is direct so we can distinguish the different messages
         __channel_sending.exchange.declare(exchange='to-mirror', exchange_type='direct')
@@ -71,7 +71,7 @@ class Messaging:
         # Create an exchange for the messages of the exchange with 'name'
         __channel_consuming.exchange.declare(exchange=name, exchange_type='direct')
 
-        # Declare a __queue to be used (random name will be used)
+        # Declare a outgoing_msgs_queue to be used (random name will be used)
         result = __channel_consuming.queue.declare(exclusive=True)
         queue_name = result['queue']
 
@@ -93,22 +93,22 @@ class Messaging:
     ''' Threadsafe sending of messages '''
     def start_sending(self):
         while True:
-            item = self.__queue.get()
+            item = self.outgoing_msgs_queue.get()
             if item is None:
                 continue
             __channel_sending.basic.publish(exchange='to-mirror',
                               routing_key=item.key,
                               body=item.body)
             # print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
-            self.__queue.task_done()
+            self.outgoing_msgs_queue.task_done()
 
     def send_message(self, key, body):
         if key not in MSG_TO_MIRROR_KEYS.__members__:
             print("[Messaging][error] %r is not a valid message key to send to the mirror" % key)
         else:
             if key == MSG_TO_MIRROR_KEYS.CLEAR_SKELETON.name:
-                self.__queue.queue.clear()
-            self.__queue.put(MirrorMessage(key, body))
+                self.outgoing_msgs_queue.queue.clear()
+            self.outgoing_msgs_queue.put(MirrorMessage(key, body))
 
 
 
