@@ -1,4 +1,4 @@
-from Server.utils.enums import MSG_FROM_INTERNAL
+from Server.utils.enums import MSG_FROM_INTERNAL, USER_JOINTS
 
 from enum import Enum
 from Server.utils.read_write_lock import ReadWriteLock
@@ -9,20 +9,25 @@ class USER_STATE(Enum):
     READY_TO_EXERCISE = 3
     EXERCISING = 2
 
+
 class EXERCISE(Enum):
     NONE = 1
     SQUAT = 2
     BICEPS_CURL = 3
+
 
 class UP_DOWN_EXERCISE_STAGE(Enum):
     NONE = 1
     GOING_DOWN = 2
     GOING_UP = 3
 
+
 class User():
 
     def __init__(self, Messaging):
         self.Messaging = Messaging
+
+        self.expected_joints = [j.name for j in USER_JOINTS]
 
         self.state = USER_STATE.NONE
         self.exercise = EXERCISE.NONE

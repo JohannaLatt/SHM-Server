@@ -2,7 +2,7 @@ from Server.modules.abstract_main_module import AbstractMainModule
 
 from Server.user import USER_STATE, EXERCISE
 
-from Server.utils.enums import MSG_TO_MIRROR_KEYS, KINECT_JOINTS, KINECT_BONES
+from Server.utils.enums import MSG_TO_MIRROR_KEYS, USER_JOINTS, KINECT_BONES
 from Server.utils.utils import angle_between, get_angle_between_bones, get_vector_of_bone, get_color_at_angle
 
 import json
@@ -153,23 +153,23 @@ class EvaluateSquatModule(AbstractMainModule):
             self.showing_knee_warning = True
 
             # Show angles
-            self.show_message_at_joint(str(right_knee_angle) + "°", KINECT_JOINTS.KneeRight.name)
-            self.show_message_at_joint(str(left_knee_angle) + "°", KINECT_JOINTS.KneeLeft.name)
+            self.show_message_at_joint(str(right_knee_angle) + "°", USER_JOINTS.KneeRight.name)
+            self.show_message_at_joint(str(left_knee_angle) + "°", USER_JOINTS.KneeLeft.name)
 
             # Show colored feedback
             left_color = get_color_at_angle(left_knee_angle, 70, 130, self.color_correct, self.color_wrong)
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeLeft.name, left_color)
+            self.change_joint_or_bone_color('joint', USER_JOINTS.KneeLeft.name, left_color)
 
             right_color = get_color_at_angle(right_knee_angle, 70, 130, self.color_correct, self.color_wrong)
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeRight.name, right_color)
+            self.change_joint_or_bone_color('joint', USER_JOINTS.KneeRight.name, right_color)
         elif self.showing_knee_warning:
             self.showing_knee_warning = False
 
-            self.hide_message_at_joint(KINECT_JOINTS.KneeRight.name)
-            self.hide_message_at_joint(KINECT_JOINTS.KneeLeft.name)
+            self.hide_message_at_joint(USER_JOINTS.KneeRight.name)
+            self.hide_message_at_joint(USER_JOINTS.KneeLeft.name)
 
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeLeft.name, '')
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.KneeRight.name, '')
+            self.change_joint_or_bone_color('joint', USER_JOINTS.KneeLeft.name, '')
+            self.change_joint_or_bone_color('joint', USER_JOINTS.KneeRight.name, '')
 
         # Save the angle over time
         angle_over_time = np.mean([right_knee_angle, left_knee_angle])
@@ -185,14 +185,14 @@ class EvaluateSquatModule(AbstractMainModule):
         self.shoulder_left_angle_over_time.append(left_shoulder_angle)
         # Find out whether the angle is in front of the use (ie rounded shoulders)
         # or behind the user (ie open shoulders)
-        left_in_front_of_user = self.joints[KINECT_JOINTS.ShoulderLeft.name][2] < self.joints[KINECT_JOINTS.SpineShoulder.name][2]
+        left_in_front_of_user = self.joints[USER_JOINTS.ShoulderLeft.name][2] < self.joints[USER_JOINTS.SpineShoulder.name][2]
         left_shoulder_okay = False
 
         # Calculate the angle of the right shoulder
         right_shoulder_angle =  self.clean_angle(angle_between(x_axis, get_vector_of_bone(self.joints, self.bones, KINECT_BONES.ClavicleRight)))
 
         self.shoulder_right_angle_over_time.append(right_shoulder_angle)
-        right_in_front_of_user = self.joints[KINECT_JOINTS.ShoulderRight.name][2] < self.joints[KINECT_JOINTS.SpineShoulder.name][2]
+        right_in_front_of_user = self.joints[USER_JOINTS.ShoulderRight.name][2] < self.joints[USER_JOINTS.SpineShoulder.name][2]
         right_shoulder_okay = False
 
         if len(self.shoulder_left_angle_over_time) < self.timeseries_length:
@@ -201,11 +201,11 @@ class EvaluateSquatModule(AbstractMainModule):
 
         # Left shoulder isn't straight over period of 10 frames - show warning
         if np.mean(np.asarray(self.shoulder_left_angle_over_time)) > self.rounded_shoulder_warning_angle and left_in_front_of_user:
-            self.show_message_at_joint(str(left_shoulder_angle) + "°", KINECT_JOINTS.ShoulderLeft.name)
+            self.show_message_at_joint(str(left_shoulder_angle) + "°", USER_JOINTS.ShoulderLeft.name)
 
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.SpineShoulder.name, self.color_wrong)
+            self.change_joint_or_bone_color('joint', USER_JOINTS.SpineShoulder.name, self.color_wrong)
             self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleLeft.name, self.color_wrong)
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderLeft.name, self.color_wrong)
+            self.change_joint_or_bone_color('joint', USER_JOINTS.ShoulderLeft.name, self.color_wrong)
 
             self.show_shoulder_warning()
         else:
@@ -213,29 +213,29 @@ class EvaluateSquatModule(AbstractMainModule):
 
         # Right shoulder isn't straight over period of 10 frames - show warning
         if np.mean(np.asarray(self.shoulder_right_angle_over_time)) > self.rounded_shoulder_warning_angle and right_in_front_of_user:
-            self.show_message_at_joint(str(right_shoulder_angle) + "°", KINECT_JOINTS.ShoulderRight.name)
+            self.show_message_at_joint(str(right_shoulder_angle) + "°", USER_JOINTS.ShoulderRight.name)
 
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.SpineShoulder.name, self.color_wrong)
+            self.change_joint_or_bone_color('joint', USER_JOINTS.SpineShoulder.name, self.color_wrong)
             self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleRight.name, self.color_wrong)
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderRight.name, self.color_wrong)
+            self.change_joint_or_bone_color('joint', USER_JOINTS.ShoulderRight.name, self.color_wrong)
 
             self.show_shoulder_warning()
         else:
             right_shoulder_okay = True
 
         # Cleanup
-        if left_shoulder_okay and right_shoulder_okay and KINECT_JOINTS.SpineShoulder.name in self.colored_joints:
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.SpineShoulder.name, '')
+        if left_shoulder_okay and right_shoulder_okay and USER_JOINTS.SpineShoulder.name in self.colored_joints:
+            self.change_joint_or_bone_color('joint', USER_JOINTS.SpineShoulder.name, '')
 
         if left_shoulder_okay and KINECT_BONES.ClavicleLeft.name in self.colored_bones:
-            self.hide_message_at_joint(KINECT_JOINTS.ShoulderLeft.name)
+            self.hide_message_at_joint(USER_JOINTS.ShoulderLeft.name)
             self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleLeft.name, '')
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderLeft.name, '')
+            self.change_joint_or_bone_color('joint', USER_JOINTS.ShoulderLeft.name, '')
 
         if right_shoulder_okay and KINECT_BONES.ClavicleRight.name in self.colored_bones:
-            self.hide_message_at_joint(KINECT_JOINTS.ShoulderRight.name)
+            self.hide_message_at_joint(USER_JOINTS.ShoulderRight.name)
             self.change_joint_or_bone_color('bone', KINECT_BONES.ClavicleRight.name, '')
-            self.change_joint_or_bone_color('joint', KINECT_JOINTS.ShoulderRight.name, '')
+            self.change_joint_or_bone_color('joint', USER_JOINTS.ShoulderRight.name, '')
 
     def show_shoulder_warning(self):
         self.show_message_at_position("Make sure to push your shoulders back,", self.text_id_shoulder_1, position={"x":-0.02, "y":0.33}, stay=3)
@@ -245,12 +245,12 @@ class EvaluateSquatModule(AbstractMainModule):
     # i.e. the z-component of the knee is always greater than the toes
     def check_body_behind_toes(self):
         # Left leg
-        left_knee_behind_toes = self.joints[KINECT_JOINTS.KneeLeft.name][2] + self.knee_behind_toes_tolerance - self.joints[KINECT_JOINTS.FootLeft.name][2]
+        left_knee_behind_toes = self.joints[USER_JOINTS.KneeLeft.name][2] + self.knee_behind_toes_tolerance - self.joints[USER_JOINTS.FootLeft.name][2]
         self.knee_over_toe_left.append(True) if left_knee_behind_toes < 0 else self.knee_over_toe_left.append(False)
         left_knee_okay = False
 
         # Right leg
-        right_knee_behind_toes = self.joints[KINECT_JOINTS.KneeRight.name][2] + self.knee_behind_toes_tolerance - self.joints[KINECT_JOINTS.FootRight.name][2]
+        right_knee_behind_toes = self.joints[USER_JOINTS.KneeRight.name][2] + self.knee_behind_toes_tolerance - self.joints[USER_JOINTS.FootRight.name][2]
         self.knee_over_toe_right.append(True) if right_knee_behind_toes < 0 else self.knee_over_toe_right.append(False)
         right_knee_okay = False
 
@@ -290,14 +290,14 @@ class EvaluateSquatModule(AbstractMainModule):
     def change_right_leg_color(self, color):
         self.change_joint_or_bone_color('bone', KINECT_BONES.ShinRight.name, color)
         self.change_joint_or_bone_color('bone', KINECT_BONES.FootRight.name, color)
-        self.change_joint_or_bone_color('joint', KINECT_JOINTS.AnkleRight.name, color)
-        self.change_joint_or_bone_color('joint', KINECT_JOINTS.FootRight.name, color)
+        self.change_joint_or_bone_color('joint', USER_JOINTS.AnkleRight.name, color)
+        self.change_joint_or_bone_color('joint', USER_JOINTS.FootRight.name, color)
 
     def change_left_leg_color(self, color):
         self.change_joint_or_bone_color('bone', KINECT_BONES.ShinLeft.name, color)
         self.change_joint_or_bone_color('bone', KINECT_BONES.FootLeft.name, color)
-        self.change_joint_or_bone_color('joint', KINECT_JOINTS.AnkleLeft.name, color)
-        self.change_joint_or_bone_color('joint', KINECT_JOINTS.FootLeft.name, color)
+        self.change_joint_or_bone_color('joint', USER_JOINTS.AnkleLeft.name, color)
+        self.change_joint_or_bone_color('joint', USER_JOINTS.FootLeft.name, color)
 
 
     # Check whether the user is always facing forward which prevents
@@ -331,19 +331,19 @@ class EvaluateSquatModule(AbstractMainModule):
         # If 70% of the last frames were wrong head positions...
         if (self.head_tilted_up_down_over_time.count(True)/self.timeseries_length) > 0.7:
             msg = str(tilted_up_down) + "°"
-            self.show_message_at_joint(msg, KINECT_JOINTS.Head.name)
+            self.show_message_at_joint(msg, USER_JOINTS.Head.name)
 
             head_color = get_color_at_angle(tilted_up_down, 0, self.tilted_up_down_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
 
             if not self.showing_head_warning:
                 self.showing_head_warning = True
-                direction = "up" if self.joints[KINECT_JOINTS.Head.name][2] > self.joints[KINECT_JOINTS.Neck.name][2] else "down"
+                direction = "up" if self.joints[USER_JOINTS.Head.name][2] > self.joints[USER_JOINTS.Neck.name][2] else "down"
                 self.show_message_at_position("Your head is tilted {},".format(direction), self.text_id_straight_1, position={"x":-0.02, "y":0.46}, stay=2)
                 self.show_message_at_position("try and look straight ahead!", self.text_id_straight_2, position={"x":-0.02, "y":0.40}, stay=2)
         elif (self.head_tilted_sideways_over_time.count(True)/self.timeseries_length) > 0.7:
             msg = str(tilted_sideways) + "°"
-            self.show_message_at_joint(msg, KINECT_JOINTS.Head.name)
+            self.show_message_at_joint(msg, USER_JOINTS.Head.name)
 
             head_color = get_color_at_angle(tilted_sideways, 0, self.tilted_sideways_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
@@ -356,13 +356,13 @@ class EvaluateSquatModule(AbstractMainModule):
             self.showing_head_warning = False
             self.hide_message_at_position(self.text_id_straight_1)
             self.hide_message_at_position(self.text_id_straight_2)
-            self.hide_message_at_joint(KINECT_JOINTS.Head.name)
+            self.hide_message_at_joint(USER_JOINTS.Head.name)
             self.set_head_color('')
 
     def set_head_color(self, color):
         self.change_joint_or_bone_color('joint', KINECT_BONES.Neck.name, color)
         self.change_joint_or_bone_color('joint', KINECT_BONES.Head.name, color)
-        self.change_joint_or_bone_color('bone', KINECT_JOINTS.Head.name, color)
+        self.change_joint_or_bone_color('bone', USER_JOINTS.Head.name, color)
 
     def clean_angle(self, angle):
         if angle > 90:

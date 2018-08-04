@@ -1,6 +1,6 @@
 from Server.modules.abstract_main_module import AbstractMainModule
 
-from Server.utils.enums import KINECT_JOINTS, KINECT_BONES
+from Server.utils.enums import USER_JOINTS, KINECT_BONES
 from Server.user import USER_STATE
 
 from Server.utils.utils import get_angle_between_bones
@@ -31,8 +31,8 @@ class RecognizeReadyForExerciseModule(AbstractMainModule):
         # Get the relevant joints and save them
         self.joints = user.get_joints()
         self.bones = user.get_bones()
-        spine_shoulder = self.joints[KINECT_JOINTS.SpineShoulder.name]
-        spine_base = self.joints[KINECT_JOINTS.SpineBase.name]
+        spine_shoulder = self.joints[USER_JOINTS.SpineShoulder.name]
+        spine_base = self.joints[USER_JOINTS.SpineBase.name]
 
         self.pos_spine_base.append(spine_base)
         self.pos_spine_shoulder.append(spine_shoulder)

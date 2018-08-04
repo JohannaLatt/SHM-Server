@@ -57,6 +57,7 @@ class KINECT_JOINTS(Enum):
     HandTipRight = 24
     ThumbRight = 25
 
+
 class KINECT_BONES(Enum):
     Head = 0
     Neck = 1
@@ -78,3 +79,28 @@ class KINECT_BONES(Enum):
     ThighRight = 17
     ShinRight = 18
     FootRight = 19
+
+
+# ----- USER JOINTS (the joints that are expected throughout the modules) ----
+class USER_JOINTS(Enum):
+    SpineBase = 1
+    SpineMid = 2
+    Neck = 3
+    Head = 4
+    ShoulderLeft = 5
+    ElbowLeft = 6
+    WristLeft = 7
+    HandLeft = 8
+    ShoulderRight = 9
+    ElbowRight = 10
+    WristRight = 11
+    HandRight = 12
+    HipLeft = 13
+    KneeLeft = 14
+    AnkleLeft = 15
+    FootLeft = 16
+    HipRight = 17
+    KneeRight = 18
+    AnkleRight = 19
+    FootRight = 20
+    SpineShoulder = 21
