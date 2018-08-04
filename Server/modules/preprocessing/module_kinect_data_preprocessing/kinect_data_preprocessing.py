@@ -1,12 +1,10 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
-from Server.utils.enums import MSG_TO_MIRROR_KEYS
-from Server.utils.enums import MSG_FROM_INTERNAL
+from Server.modules.abstract_preprocessing_module import AbstractPreprocessingModule
 from Server.utils.mapping import KinectBoneMapping
 
 import json
 
 
-class KinectDataPreprocessing(AbstractMirrorModule):
+class KinectDataPreprocessing(AbstractPreprocessingModule):
     ''' Pre-processing Module (ie uses tracking data) '''
     ''' Takes the incoming tracking data from a Kinect-device
         and formats it according to the server's expected data model
