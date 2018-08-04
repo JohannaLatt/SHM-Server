@@ -28,7 +28,7 @@ class AbstractPreprocessingModule(AbstractMirrorModule):
             if np.array_equal(self.User.expected_joints, list(data.keys())):
                 self.data_format_correct = True
             else:
-                print("[AbstractPreprocessingModule][Error] The currently used preprocessing tool does not produce the expected joints - the data is not propagated!")
+                print("[Error][AbstractPreprocessingModule] The currently used preprocessing tool does not produce the expected joints - the data is not propagated!")
             self.data_format_checked = True
 
         if self.data_format_checked and self.data_format_correct:
