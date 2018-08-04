@@ -1,11 +1,11 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
+from Server.modules.abstract_main_module import AbstractMainModule
 from Server.utils.enums import MSG_TO_MIRROR_KEYS
 
 import json
 from enum import Enum
 
 
-class RenderSkeletonModule(AbstractMirrorModule):
+class RenderSkeletonModule(AbstractMainModule):
     ''' Processing Module (ie uses preprocessed internal data) '''
     ''' Takes the preprocessed data and sends it to the mirror for rendering '''
 

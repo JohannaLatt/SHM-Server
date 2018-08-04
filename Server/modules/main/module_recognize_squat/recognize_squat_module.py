@@ -1,18 +1,14 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
-from Server.utils.enums import KINECT_JOINTS, KINECT_BONES
-from Server.utils.enums import MSG_TO_MIRROR_KEYS
+from Server.modules.abstract_main_module import AbstractMainModule
 
 from Server.user import USER_STATE, EXERCISE, UP_DOWN_EXERCISE_STAGE
 
+from Server.utils.enums import KINECT_JOINTS, KINECT_BONES
 from Server.utils.utils import get_angle_between_bones
 
-import json
 from collections import deque
 
-import numpy as np
 
-
-class RecognizeSquatModule(AbstractMirrorModule):
+class RecognizeSquatModule(AbstractMainModule):
 
     threshold_equal_y_pos = 20     # maximum wiggle room in y to consider two y-positions as the same
     threshold_movement_in_y = None   # minimum distance needed in y to count something as a squat (will be calculated per user)

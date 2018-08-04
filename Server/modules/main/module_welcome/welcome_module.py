@@ -1,11 +1,9 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
-from Server.utils.enums import MSG_TO_MIRROR_KEYS
+from Server.modules.abstract_main_module import AbstractMainModule
 
-import json
 import threading
 
 
-class WelcomeModule(AbstractMirrorModule):
+class WelcomeModule(AbstractMainModule):
 
     def __init__(self, Messaging, queue, User):
         super().__init__(Messaging, queue, User)
@@ -32,7 +30,7 @@ class WelcomeModule(AbstractMirrorModule):
     def tracking_data(self, data):
         super().tracking_data(data)
         if self.remind_user_timer is not None:
-            self.remind_user_timer.cancel()    
+            self.remind_user_timer.cancel()
 
     def tracking_lost(self):
         super().tracking_lost()

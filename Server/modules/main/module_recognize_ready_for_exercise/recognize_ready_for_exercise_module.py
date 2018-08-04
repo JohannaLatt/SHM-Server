@@ -1,6 +1,6 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
+from Server.modules.abstract_main_module import AbstractMainModule
+
 from Server.utils.enums import KINECT_JOINTS, KINECT_BONES
-from Server.utils.enums import MSG_TO_MIRROR_KEYS
 from Server.user import USER_STATE
 
 from Server.utils.utils import get_angle_between_bones
@@ -8,7 +8,8 @@ from Server.utils.utils import get_angle_between_bones
 from collections import deque
 import numpy as np
 
-class RecognizeReadyForExerciseModule(AbstractMirrorModule):
+
+class RecognizeReadyForExerciseModule(AbstractMainModule):
 
     timeseries_length = 20
     max_std_x = 80

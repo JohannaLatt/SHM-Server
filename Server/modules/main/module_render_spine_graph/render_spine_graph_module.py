@@ -1,12 +1,13 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
-from Server.utils.enums import MSG_TO_MIRROR_KEYS, KINECT_JOINTS
+from Server.modules.abstract_main_module import AbstractMainModule
+
+from Server.utils.enums import MSG_TO_MIRROR_KEYS
 from Server.user import USER_STATE, EXERCISE
 
 import json
 import configparser
 
 
-class RenderSpineGraphModule(AbstractMirrorModule):
+class RenderSpineGraphModule(AbstractMainModule):
     ''' Processing Module (ie uses preprocessed internal data) '''
     ''' Takes the spine-data from the preprocessed data and sends it to
         the mirror for rendering '''

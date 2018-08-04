@@ -1,9 +1,9 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
+from Server.modules.abstract_main_module import AbstractMainModule
 
-from Server.user import USER_STATE, EXERCISE, UP_DOWN_EXERCISE_STAGE
+from Server.user import USER_STATE, EXERCISE
 
 from Server.utils.enums import MSG_TO_MIRROR_KEYS, KINECT_JOINTS, KINECT_BONES
-from Server.utils.utils import angle_between, lerp_hsv, get_angle_between_bones, get_vector_of_bone, get_color_at_angle
+from Server.utils.utils import angle_between, get_angle_between_bones, get_vector_of_bone, get_color_at_angle
 
 import json
 import numpy as np
@@ -11,7 +11,7 @@ from collections import deque
 import configparser
 
 
-class EvaluateSquatModule(AbstractMirrorModule):
+class EvaluateSquatModule(AbstractMainModule):
 
     timeseries_length = 10
 

@@ -1,4 +1,4 @@
-from Server.modules.abstract_mirror_module import AbstractMirrorModule
+from Server.modules.abstract_main_module import AbstractMainModule
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -9,7 +9,7 @@ import json
 max_number_of_log_files = 20
 
 
-class LoggingModule(AbstractMirrorModule):
+class LoggingModule(AbstractMainModule):
 
     def __init__(self, Messaging, queue, User):
         super().__init__(Messaging, queue, User)
