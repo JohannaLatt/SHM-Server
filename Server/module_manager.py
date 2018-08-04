@@ -4,6 +4,7 @@ import threading
 import queue
 
 from Server.user import User
+from Server.modules.abstract_mirror_module import AbstractMirrorModule
 
 
 # Instantiate all modules from the config
@@ -32,9 +33,14 @@ class ModuleManager():
             module_queue = queue.Queue()
             self.__module_queues.append(module_queue)
             instance = class_(Messaging, module_queue, self.User)
-            module_thread = threading.Thread(target=instance.run)
-            module_thread.daemon = True
-            module_thread.start()
+
+            # Check that the module implements the AbstractMirrorModule
+            if not issubclass(type(instance), AbstractMirrorModule):
+                print("\033[91m[Error][ModuleManager] The module {} from the config-file does not implement the AbstractMirrorModule - not starting this module!\033[0m".format(class_))
+            else:
+                module_thread = threading.Thread(target=instance.run)
+                module_thread.daemon = True
+                module_thread.start()
 
         # Continuously listen for messages in the Messaging-module and distribute those to the modules
         listen_to_messages_thread = threading.Thread(target=self.run)
