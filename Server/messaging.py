@@ -61,7 +61,7 @@ class Messaging:
         self.outgoing_msgs_queue = queue.Queue()
 
         # Create an exchange for the mirror-messages - type is direct so we can distinguish the different messages
-        __channel_sending.exchange.declare(exchange='to-mirror', exchange_type='direct')
+        __channel_sending.exchange.declare(exchange='from-server', exchange_type='direct')
 
     def _initiate_message_consuming(self):
         self.__initiate_messaging_from_outside('from-mirror', MSG_FROM_MIRROR_KEYS, self.consume_mirror_message)
@@ -96,7 +96,7 @@ class Messaging:
             item = self.outgoing_msgs_queue.get()
             if item is None:
                 continue
-            __channel_sending.basic.publish(exchange='to-mirror',
+            __channel_sending.basic.publish(exchange='from-server',
                               routing_key=item.key,
                               body=item.body)
             # print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
