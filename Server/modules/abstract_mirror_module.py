@@ -1,4 +1,5 @@
 from abc import ABC
+from datetime import datetime
 
 from Server.utils.enums import MSG_FROM_MIRROR_KEYS
 from Server.utils.enums import MSG_FROM_KINECT_KEYS
@@ -12,6 +13,10 @@ class AbstractMirrorModule(ABC):
         self.Messaging = Messaging
         self.__queue = queue
         self.User = User
+
+        # The maximum allowed age of a message (in seconds) to still process it.
+        # This is to avoid having slow modules work on outdated data and fall behind.
+        self.max_msg_age = 1
 
     def mirror_started(self):
         # By default, do nothing with it
@@ -53,7 +58,8 @@ class AbstractMirrorModule(ABC):
         while True:
             item = self.__queue.get()
 
-            if item is None:
+            if item is None or (datetime.now() - item.timestamp).total_seconds() > self.max_msg_age:
+                self.__queue.task_done()
                 continue
 
             if item.key == MSG_FROM_MIRROR_KEYS.MIRROR_READY.name:

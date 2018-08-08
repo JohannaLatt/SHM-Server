@@ -7,6 +7,7 @@ from amqpstorm import Connection
 import configparser
 import queue
 import json
+from datetime import datetime
 
 
 # The format in which messages are shared accross the service
@@ -14,6 +15,7 @@ class MirrorMessage:
     def __init__(self, key, body):
         self.key = key
         self.body = body
+        self.timestamp = datetime.now()
 
 
 class Messaging:
