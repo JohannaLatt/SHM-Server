@@ -41,9 +41,13 @@ class KinectDataPreprocessing(AbstractPreprocessingModule):
 
         # Remove "ThumbRight", "ThumbLeft", "HandTipRight" and "HandTipLeft"
         # since they are not expected by the User-object
-        del data[KINECT_JOINTS.HandTipLeft.name]
-        del data[KINECT_JOINTS.HandTipRight.name]
-        del data[KINECT_JOINTS.ThumbLeft.name]
-        del data[KINECT_JOINTS.ThumbRight.name]
+        self.remove_joint(data, KINECT_JOINTS.HandTipLeft.name)
+        self.remove_joint(data, KINECT_JOINTS.HandTipRight.name)
+        self.remove_joint(data, KINECT_JOINTS.ThumbLeft.name)
+        self.remove_joint(data, KINECT_JOINTS.ThumbRight.name)
 
         super().update_user_joints(data)
+
+    def remove_joint(self, data, joint):
+        if joint in data:
+            del data[joint]
