@@ -63,7 +63,7 @@ class RecognizeReadyForExerciseModule(AbstractMainModule):
         right_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighRight, KINECT_BONES.ShinRight)
         left_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighLeft, KINECT_BONES.ShinLeft)
 
-        return  right_knee_angle < 30 and left_knee_angle < 30
+        return right_knee_angle < 30 and left_knee_angle < 30
 
     def tracking_lost(self):
         super().tracking_lost()

@@ -189,7 +189,7 @@ class EvaluateSquatModule(AbstractMainModule):
         left_shoulder_okay = False
 
         # Calculate the angle of the right shoulder
-        right_shoulder_angle =  self.clean_angle(angle_between(x_axis, get_vector_of_bone(self.joints, self.bones, KINECT_BONES.ClavicleRight)))
+        right_shoulder_angle = self.clean_angle(angle_between(x_axis, get_vector_of_bone(self.joints, self.bones, KINECT_BONES.ClavicleRight)))
 
         self.shoulder_right_angle_over_time.append(right_shoulder_angle)
         right_in_front_of_user = self.joints[USER_JOINTS.ShoulderRight.name][2] < self.joints[USER_JOINTS.SpineShoulder.name][2]
