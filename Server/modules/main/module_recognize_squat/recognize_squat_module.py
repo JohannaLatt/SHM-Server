@@ -64,7 +64,6 @@ class RecognizeSquatModule(AbstractMainModule):
             if self.threshold_movement_in_y is None:
                 self.threshold_movement_in_y = (self.starting_spine_shoulder_pos[1] - self.starting_spine_base_pos[1]) / 5
 
-
             self.ready_to_squat = True
         elif user.get_user_state() is USER_STATE.NONE and self.squatting:
             # Walked away
@@ -85,7 +84,6 @@ class RecognizeSquatModule(AbstractMainModule):
         self.bones = user.get_bones()
         spine_shoulder = self.joints[USER_JOINTS.SpineShoulder.name]
         spine_base = self.joints[USER_JOINTS.SpineBase.name]
-        spine_mid = self.joints[USER_JOINTS.SpineMid.name]
 
         self.pos_spine_base.append(spine_base)
         self.pos_spine_shoulder.append(spine_shoulder)
