@@ -136,10 +136,10 @@ class NewModule(AbstractMainModule):
 If some of the methods are not needed, they can also just be left out. 
 The framework will ensure that the respective methods are called when an update to the respective data happens. 
 
-To include the newly created module into the framework, it lastly also has to be added to the [config-file](https://github.com/JohannaLatt/SHM-Server/blob/master/Server/config/mirror_config.ini). The module-name (i.e. the class-name, in the example `CustomName`) has to be added to the list of module-names in the \[General\[-section of the config-file. Then, a new section for the new module has to be added to the end of the config-file, specifying where the framework can find the new package. Following the example, the new section will look like this:
+To include the newly created module into the framework, it lastly also has to be added to the [config-file](https://github.com/JohannaLatt/SHM-Server/blob/master/Server/config/mirror_config.ini). The module-name (i.e. the class-name, in the example `CustomName`) has to be added to the list of module-names in the \[General\]-section of the config-file. Then, a new section for the new module has to be added to the end of the config-file, specifying where the framework can find the new package. Following the example, the new section would look like this:
 
 ```
-[RecognizeBicepsCurlModule]
+[CustomModule]
 path_name = main.module_custom.custom_module
 class_name = CustomModule
 ```
