@@ -1,6 +1,6 @@
 # Smart-Health-Mirror: Server-Module
 
-The server is the core of the [Smart Health Mirror framework](https://github.com/JohannaLatt/Master-Thesis-Smart-Health-Mirror). It receives incoming data from the [kinect](https://github.com/JohannaLatt/SHM-Kinect) and preprocesses that data into the expected format which consists of a bone- and a joint-mapping.
+The server is the core of the [Smart Health Mirror framework](https://github.com/JohannaLatt/Master-Thesis-Smart-Health-Mirror). It receives incoming data from the [Kinect](https://github.com/JohannaLatt/SHM-Kinect) and preprocesses that data into the expected format which consists of a bone- and a joint-mapping.
 
 ```
 Joints:
@@ -18,7 +18,7 @@ Bones:
 }
 ``` 
 
-After the preprocessing, the main modules of the server are triggered and they all work on the preprocessed data, i.e. expect the format specified above. Each module does their own independent processing of that data and can then either trigger further internal actions or communicate with the [mirror](https://github.com/JohannaLatt/SHM-Mirror).
+After the preprocessing, the main modules of the server are triggered and they all work on the preprocessed data, i.e. expect the format specified above. Each module does their own independent processing of that data and can then either trigger further internal actions or communicate with the [Mirror](https://github.com/JohannaLatt/SHM-Mirror).
 
 The modules the server consists of can be specified in a config-file. At startup, the server starts one thread per module and each module receives its own message-queue. Incoming external and internal messages are distributed to all modules via their own message queues so that they can handle the incoming data in their own time without potentially impairing other modules that might be more performant.
 
