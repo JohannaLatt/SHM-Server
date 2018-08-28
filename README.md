@@ -73,3 +73,75 @@ The server is a simply Python flask server that we need to start:
 ```
 flask run
 ```
+
+## Add Custom Modules
+
+To write your own module, create a new folder inside the modules-folder (either sort it into `preprocessing` or `main` to keep the structure clean) and adhere to the naming conventions: `module-[your custom module name]`. Inside that folder, create an empty `__init__.py`-file. These empty files are a python convention to  tell python that this folder contains a package so that it can be easily referenced. If needed, you can also use this file to import important dependencies or libraries needed for your module.
+
+Secondly, create your actual module-file, that following the framework's naming conventions should be called `[your custom module name]-module.py`. Inside this file, declare your module as a class and make sure to **inherit from either the `AbstractMainModule` or the `AbstractPreprocessingModule`!**. 
+
+Main-Modules run on preprocessed data, i.e. they are not concerned with the format of the incoming tracking data but will just assume the following format: 
+Joints:
+{
+  'SpineBase': [331.2435, -419.485077, 2150.36621], 
+  'SpineMid': [313.7696, -185.470459, 1992.33936], 
+  'Neck': [294.341644, 44.1935768, 1821.40552], 
+  'Head': [301.3063, 171.161179, 1819.05847], ...
+ }
+ 
+Bones:
+{
+  'ClavicleRight': ['SpineShoulder', 'ShoulderRight'],
+  'ShinLeft': ['KneeLeft', 'AnkleLeft'], ...
+}
+
+Preprocessing-modules are mainly intended to be written if a new tracking system is added to the framework. Preprocessing modules receive the raw tracking data and are responsible for transforming it into the data format expected by the main-modules above. 
+
+A newly added, empty main-module could look like this:
+
+```python
+from Server.modules.abstract_main_module import AbstractMainModule
+
+class NewModule(AbstractMainModule):
+
+    def __init__(self, Messaging, queue, User):
+        super().__init__(Messaging, queue, User)
+        # do something
+
+    def mirror_started(self):
+        super().mirror_started()
+        # do something
+
+    def user_state_updated(self, user):
+        super().user_state_updated(user)
+        # do something
+
+    def user_skeleton_updated(self, user):
+        super().user_skeleton_updated(user)
+        # do something
+        
+    def user_exercise_updated(self, user):
+        super().user_exercise_updated(user)
+        # do something
+
+    def user_exercise_stage_updated(self, user):
+        super().user_exercise_stage_updated(user)
+        # do something
+
+    def user_finished_repetition(self, user):
+        super().user_finished_repetition(user)
+        # do something
+ ```
+
+If some of the methods are not needed, they can also just be left out. 
+The framework will ensure that the respective methods are called when an update to the respective data happens. 
+
+To include the newly created module into the framework, it lastly also has to be added to the [config-file](https://github.com/JohannaLatt/SHM-Server/blob/master/Server/config/mirror_config.ini). The module-name (i.e. the class-name, in the example `CustomName`) has to be added to the list of module-names in the \[General\[-section of the config-file. Then, a new section for the new module has to be added to the end of the config-file, specifying where the framework can find the new package. Following the example, the new section will look like this:
+
+```
+[RecognizeBicepsCurlModule]
+path_name = main.module_custom.custom_module
+class_name = CustomModule
+```
+
+In theory, the naming conventions do not have to be followed and the files can be created anywhere as long as they are correctly referenced inside the config-file and implement the necessary interfaces.
