@@ -1,7 +1,5 @@
 # Smart-Health-Mirror: Server-Module
 
-This service is responsible for providing 3D skeletal joint data for the [Smart Health Mirror framework](https://github.com/JohannaLatt/Master-Thesis-Smart-Health-Mirror)
-
 The server is the core of the [Smart Health Mirror framework](https://github.com/JohannaLatt/Master-Thesis-Smart-Health-Mirror). It receives incoming data from the [kinect](https://github.com/JohannaLatt/SHM-Kinect) and preprocesses that data into the expected format which consists of a bone- and a joint-mapping.
 
 ```
