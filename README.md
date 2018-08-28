@@ -78,9 +78,10 @@ flask run
 
 To write your own module, create a new folder inside the modules-folder (either sort it into `preprocessing` or `main` to keep the structure clean) and adhere to the naming conventions: `module-[your custom module name]`. Inside that folder, create an empty `__init__.py`-file. These empty files are a python convention to  tell python that this folder contains a package so that it can be easily referenced. If needed, you can also use this file to import important dependencies or libraries needed for your module.
 
-Secondly, create your actual module-file, that following the framework's naming conventions should be called `[your custom module name]-module.py`. Inside this file, declare your module as a class and make sure to **inherit from either the `AbstractMainModule` or the `AbstractPreprocessingModule`!**. 
+### Preprocessing- and Main-Modules
 
-Main-Modules run on preprocessed data, i.e. they are not concerned with the format of the incoming tracking data but will just assume the following format: 
+Main-Modules run on preprocessed data, i.e. they are not concerned with the format of the incoming tracking data but will just assume the following format:
+```
 Joints:
 {
   'SpineBase': [331.2435, -419.485077, 2150.36621], 
@@ -94,8 +95,13 @@ Bones:
   'ClavicleRight': ['SpineShoulder', 'ShoulderRight'],
   'ShinLeft': ['KneeLeft', 'AnkleLeft'], ...
 }
+```
 
 Preprocessing-modules are mainly intended to be written if a new tracking system is added to the framework. Preprocessing modules receive the raw tracking data and are responsible for transforming it into the data format expected by the main-modules above. 
+
+### Creation of your Custom Module
+
+After creating the folder, create your actual module-file, that following the framework's naming conventions should be called `[your custom module name]-module.py`. Inside this file, declare your module as a class and make sure to **inherit from either the `AbstractMainModule` or the `AbstractPreprocessingModule`!**, depending on your use case.
 
 A newly added, empty main-module could look like this:
 
@@ -145,3 +151,5 @@ class_name = CustomModule
 ```
 
 In theory, the naming conventions do not have to be followed and the files can be created anywhere as long as they are correctly referenced inside the config-file and implement the necessary interfaces.
+
+Once you start the server, the server will automatically find your newly created package based on the config-file and run your module in its own thread.
