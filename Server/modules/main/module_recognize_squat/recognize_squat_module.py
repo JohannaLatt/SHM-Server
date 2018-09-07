@@ -109,14 +109,9 @@ class RecognizeSquatModule(AbstractMainModule):
                         self.User.update_exercise_stage(UP_DOWN_EXERCISE_STAGE.GOING_DOWN)
 
                 # After moving down, moved back up and knees are straight -> SQUAT COMPLETE
-                # print(abs(self.starting_spine_shoulder_pos[1] - spine_shoulder[1]))
-                if not self.just_finished_squat and self.squatting and self.knees_are_straight() and abs(self.starting_spine_shoulder_pos[1] - spine_shoulder[1]) < self.threshold_equal_y_pos:
+                if not self.just_finished_squat and self.squatting and self.knees_are_straight() and (self.starting_spine_shoulder_pos[1] - spine_shoulder[1]) < self.threshold_equal_y_pos:
                     self.just_finished_squat = True
                     self.repetitions += 1
-
-                    # Reset squat variables
-                    self.starting_spine_shoulder_pos = spine_shoulder
-                    self.starting_spine_base_pos = spine_base
 
                     self.send_to_mirror("exercise_repetitions", "Repetitions: {}".format(self.repetitions))
                     self.User.user_finished_repetition()
@@ -135,7 +130,7 @@ class RecognizeSquatModule(AbstractMainModule):
         right_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighRight, KINECT_BONES.ShinRight)
         left_knee_angle = get_angle_between_bones(self.joints, self.bones, KINECT_BONES.ThighLeft, KINECT_BONES.ShinLeft)
 
-        return  right_knee_angle < 20 and left_knee_angle < 20
+        return right_knee_angle < 15 and left_knee_angle < 15
 
     def tracking_lost(self):
         # print("[RecognizeSquatModule][info] Cleaning up")

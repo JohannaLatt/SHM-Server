@@ -41,10 +41,17 @@ class User():
         self.lock = ReadWriteLock()
 
     def update_state(self, state):
+        if state is self.state:
+            return
+
         if state is USER_STATE.NONE or state is USER_STATE.READY_TO_EXERCISE:
-            self.__set_repetitions(0)
             self.update_exercise(EXERCISE.NONE)
             self.update_exercise_stage(UP_DOWN_EXERCISE_STAGE.NONE)
+
+        if state is not USER_STATE.NONE:
+            # Only reset the repetitions once a new exercise starts, in case
+            # the repetitions of the last exercise are of interest for a module
+            self.__set_repetitions(0)
 
         self.lock.acquire_write()
         self.state = state
@@ -56,8 +63,8 @@ class User():
         if exercise is not EXERCISE.NONE:
             self.update_state(USER_STATE.EXERCISING)
 
-        if exercise is not self.exercise:
-            self.__set_repetitions(0)
+            if exercise is not self.exercise:
+                self.__set_repetitions(0)
 
         self.lock.acquire_write()
         self.exercise = exercise

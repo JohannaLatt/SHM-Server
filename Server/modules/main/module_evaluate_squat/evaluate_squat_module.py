@@ -75,6 +75,15 @@ class EvaluateSquatModule(AbstractMainModule):
         self.knee_over_toe_left = deque(maxlen=self.timeseries_length)
         self.knee_over_toe_right = deque(maxlen=self.timeseries_length)
 
+        # summary
+        self.reset_summary_variables()
+
+        self.text_id_summary_1 = "summary_1"
+        self.text_id_summary_2 = "summary_2"
+        self.text_id_summary_3 = "summary_3"
+        self.text_id_summary_4 = "summary_4"
+        self.text_id_summary_5 = "summary_5"
+
     def user_skeleton_updated(self, user):
         super().user_skeleton_updated(user)
 
@@ -98,14 +107,44 @@ class EvaluateSquatModule(AbstractMainModule):
             self.reset_skeleton_color()
             self.reset_variables()
 
+    def user_state_updated(self, user):
+        super().user_state_updated(user)
+
+        current_rep = user.get_current_repetitions()
+
+        # Show a summary when the user walks away
+        if user.get_user_state() is USER_STATE.NONE and current_rep > 0:
+            average_knee_angle = int(np.mean(np.asarray(self.min_knee_angles)))
+            head_warnings = sum(self.head_warnings_per_rep)
+            shoulder_warnings = sum(self.shoulder_warnings_per_rep)
+            toe_warnings = sum(self.toe_warnings_per_rep)
+
+            self.show_message_at_position("Good job! You finished {} repetitions!".format(current_rep), self.text_id_summary_1, halign="center", position={"x": 0, "y": 0.1}, stay=4)
+            self.show_message_at_position("Your average knee angle was {}°".format(average_knee_angle), self.text_id_summary_2, halign="center", position={"x": 0, "y": 0.04}, stay=4)
+            self.show_message_at_position("Your head was not straight in {} repetitions.".format(head_warnings), self.text_id_summary_3, halign="center", position={"x": 0, "y": -0.02}, stay=4)
+            self.show_message_at_position("Your shoulders were rounded in {} repetitions".format(shoulder_warnings), self.text_id_summary_4, halign="center", position={"x": 0, "y": -0.08}, stay=4)
+            self.show_message_at_position("Your toes were in front of your knees in {} repetitions".format(toe_warnings), self.text_id_summary_5, halign="center", position={"x": 0, "y": -0.14}, stay=4)
+
+            self.reset_summary_variables()
+
     def user_finished_repetition(self, user):
+        super().user_finished_repetition(user)
+
+        current_rep = user.get_current_repetitions()
+
         # Save the maximum angle the user reached in this rep
         self.min_knee_angle_over_time.append(self.min_knee_angle_in_current_rep)
+        self.min_knee_angles.append(self.min_knee_angle_in_current_rep)
         self.min_knee_angle_in_current_rep = 180
+
+        # Summary (did the user get a warning in this rep)
+        self.head_warnings_per_rep.append(self.head_warning_in_current_rep)
+        self.shoulder_warnings_per_rep.append(self.shoulder_warning_in_current_rep)
+        self.toe_warnings_per_rep.append(self.toe_warning_in_current_rep)
 
         # See if the user continuously does not go low (check that after every
         # x repetitions)
-        if user.get_current_repetitions() % self.repetitions_until_check != 0:
+        if current_rep % self.repetitions_until_check != 0:
             return
 
         average_min_knee_angle = int(np.mean(np.asarray(self.min_knee_angle_over_time)))
@@ -128,6 +167,16 @@ class EvaluateSquatModule(AbstractMainModule):
         self.head_tilted_up_down_over_time.clear()
         self.head_tilted_up_down_over_time.clear()
         self.evaluating = False
+
+    def reset_summary_variables(self):
+        self.min_knee_angles = []
+
+        self.head_warning_in_current_rep = False
+        self.head_warnings_per_rep = []
+        self.shoulder_warning_in_current_rep = False
+        self.shoulder_warnings_per_rep = []
+        self.toe_warning_in_current_rep = False
+        self.toe_warnings_per_rep = []
 
     def clean_UI(self):
         for text_ids in self.text_ids.copy():
@@ -223,6 +272,11 @@ class EvaluateSquatModule(AbstractMainModule):
         else:
             right_shoulder_okay = True
 
+
+        # Summary
+        if not left_shoulder_okay or not right_shoulder_okay:
+            self.shoulder_warning_in_current_rep = True
+
         # Cleanup
         if left_shoulder_okay and right_shoulder_okay and USER_JOINTS.SpineShoulder.name in self.colored_joints:
             self.change_joint_or_bone_color('joint', USER_JOINTS.SpineShoulder.name, '')
@@ -276,6 +330,10 @@ class EvaluateSquatModule(AbstractMainModule):
         else:
             right_knee_okay = True
 
+        # Summary
+        if not left_knee_okay or not right_knee_okay:
+            self.toe_warning_in_current_rep = True
+
         # Cleanup
         if left_knee_okay and KINECT_BONES.FootLeft.name in self.colored_bones:
             self.change_left_leg_color('')
@@ -298,7 +356,6 @@ class EvaluateSquatModule(AbstractMainModule):
         self.change_joint_or_bone_color('bone', KINECT_BONES.FootLeft.name, color)
         self.change_joint_or_bone_color('joint', USER_JOINTS.AnkleLeft.name, color)
         self.change_joint_or_bone_color('joint', USER_JOINTS.FootLeft.name, color)
-
 
     # Check whether the user is always facing forward which prevents
     # spine pain and damage.
@@ -336,6 +393,8 @@ class EvaluateSquatModule(AbstractMainModule):
             head_color = get_color_at_angle(tilted_up_down, 0, self.tilted_up_down_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
 
+            self.head_warning_in_current_rep = True
+
             if not self.showing_head_warning:
                 self.showing_head_warning = True
                 direction = "up" if self.joints[USER_JOINTS.Head.name][2] > self.joints[USER_JOINTS.Neck.name][2] else "down"
@@ -347,6 +406,8 @@ class EvaluateSquatModule(AbstractMainModule):
 
             head_color = get_color_at_angle(tilted_sideways, 0, self.tilted_sideways_head_min_warning_angle + 5, self.color_correct, self.color_wrong)
             self.set_head_color(head_color)
+
+            self.head_warning_in_current_rep = True
 
             if not self.showing_head_warning:
                 self.showing_head_warning = True
@@ -393,8 +454,8 @@ class EvaluateSquatModule(AbstractMainModule):
         if joint in self.text_ids:
             self.text_ids.remove(joint)
 
-    def show_message_at_position(self, text, id, position, stay=10000):
-        self.Messaging.send_text_to_mirror(text, id=id, position=position, stay=stay, halign="right")
+    def show_message_at_position(self, text, id, position, stay=10000, halign="right"):
+        self.Messaging.send_text_to_mirror(text, id=id, position=position, stay=stay, halign=halign)
         self.text_ids.add(id)
 
     def hide_message_at_position(self, id):
