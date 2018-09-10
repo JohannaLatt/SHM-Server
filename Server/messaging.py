@@ -46,6 +46,7 @@ class Messaging:
 
     # Callback for consuming incoming messages from the Kinect
     def consume_kinect_message(self, message):
+        #print("[Received][Messaging]{}: {}".format(message.method['routing_key'],  message.body[0:50]))
         if message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name:
             self.incoming_msgs_queue.put(MirrorMessage(MSG_FROM_KINECT_KEYS.TRACKING_STARTED.name, ''))
         elif message.method['routing_key'] == MSG_FROM_KINECT_KEYS.TRACKING_DATA.name:
@@ -101,7 +102,7 @@ class Messaging:
             __channel_sending.basic.publish(exchange='from-server',
                               routing_key=item.key,
                               body=item.body)
-            # print("[info] Sent {}: {}".format(item['key'], item['body'][0:50]))
+            #print("[info] Sent {}: {}".format(item.key, item.body[0:50]))
             self.outgoing_msgs_queue.task_done()
 
     def send_message(self, key, body):

@@ -119,11 +119,12 @@ class EvaluateSquatModule(AbstractMainModule):
             shoulder_warnings = sum(self.shoulder_warnings_per_rep)
             toe_warnings = sum(self.toe_warnings_per_rep)
 
-            self.show_message_at_position("Good job! You finished {} repetitions!".format(current_rep), self.text_id_summary_1, halign="center", position={"x": 0, "y": 0.1}, stay=4)
-            self.show_message_at_position("Your average knee angle was {}°".format(average_knee_angle), self.text_id_summary_2, halign="center", position={"x": 0, "y": 0.04}, stay=4)
-            self.show_message_at_position("Your head was not straight in {} repetitions.".format(head_warnings), self.text_id_summary_3, halign="center", position={"x": 0, "y": -0.02}, stay=4)
-            self.show_message_at_position("Your shoulders were rounded in {} repetitions".format(shoulder_warnings), self.text_id_summary_4, halign="center", position={"x": 0, "y": -0.08}, stay=4)
-            self.show_message_at_position("Your toes were in front of your knees in {} repetitions".format(toe_warnings), self.text_id_summary_5, halign="center", position={"x": 0, "y": -0.14}, stay=4)
+            stay = 5
+            self.show_message_at_position("Good job! You finished {} repetitions!".format(current_rep), self.text_id_summary_1, halign="center", position={"x": 0, "y": 0.1}, stay=stay)
+            self.show_message_at_position("Your average knee angle was {}°".format(average_knee_angle), self.text_id_summary_2, halign="center", position={"x": 0, "y": 0.04}, stay=stay)
+            self.show_message_at_position("Your head was not straight in {} repetitions.".format(head_warnings), self.text_id_summary_3, halign="center", position={"x": 0, "y": -0.02}, stay=stay)
+            self.show_message_at_position("Your shoulders were rounded in {} repetitions".format(shoulder_warnings), self.text_id_summary_4, halign="center", position={"x": 0, "y": -0.08}, stay=stay)
+            self.show_message_at_position("Your toes were in front of your knees in {} repetitions".format(toe_warnings), self.text_id_summary_5, halign="center", position={"x": 0, "y": -0.14}, stay=stay)
 
             self.reset_summary_variables()
 

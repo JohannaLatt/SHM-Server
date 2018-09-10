@@ -65,7 +65,7 @@ class RecognizeSquatModule(AbstractMainModule):
                 self.threshold_movement_in_y = (self.starting_spine_shoulder_pos[1] - self.starting_spine_base_pos[1]) / 5
 
             self.ready_to_squat = True
-        elif user.get_user_state() is USER_STATE.NONE and self.squatting:
+        elif user.get_user_state() is USER_STATE.NONE:
             # Walked away
             print("[RecognizeSquatModule][info] Walked away")
 
